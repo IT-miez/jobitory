@@ -1,0 +1,66 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+// Schemas for the application
+// Commented out parts that are yet to be converted
+// to work with PSQL
+
+model Education {
+  id Int @id @default(autoincrement())
+  school_name String
+  city String
+  degree String
+  subject String
+  //from DateTime
+  //to DateTime | null
+  additional_information String
+}
+
+model Experience {
+  id Int @id @default(autoincrement())
+  company_name String
+  position String
+  city String
+  //from DateTime
+  // to DateTime
+  additional_Information String
+}
+
+// Note!
+// Add models for CV, Certificates and Custom_Box here
+
+model Job {
+  id Int @id @default(autoincrement()) 
+  position String
+  status String
+  additional_information String
+  url String
+}
+
+model User {
+  id      Int      @id @default(autoincrement())
+  email   String   @unique
+  name    String?
+  phone_number String
+  address String
+  post_code String
+  municipality  String
+  // avatar Image
+  username String
+  password String
+  // createdAt DateTime
+  // updatedAt DateTime
+}
