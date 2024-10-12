@@ -3,6 +3,17 @@
     "@apollo/server": "^4.11.0",
     "@prisma/client": "^5.20.0",
     "graphql": "^16.9.0",
-    "prisma": "^5.20.0"
+    "nodemon": "^3.1.7"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.5",
+    "prisma": "^5.20.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.3"
+  },
+  "type": "module",
+  "scripts": {
+    "compile": "tsc",
+    "start": "npm run compile && nodemon ./dist/index.js"
   }
 }
