@@ -1,9 +1,25 @@
 import { ApolloServer } from '@apollo/server'; // preserve-line
 import { startStandaloneServer } from '@apollo/server/standalone'; // preserve-line
-
+import dotenv from 'dotenv';
+// Prisma
 import { PrismaClient } from '@prisma/client'
-
 const prisma = new PrismaClient() 
+
+// Password security
+import bcrypt from 'bcryptjs';
+import passport from 'passport';
+import { Strategy as LocalStrategy } from 'passport-local';
+import JwtStrategyConfiguration from '../utils/passportSetup.js';
+
+dotenv.config();
+
+// JWT SETUP
+import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
+
+const opts: any = {};
+opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
+opts.secretOrKey = process.env.SECRET;
+passport.use(JwtStrategyConfiguration);
 
 // A schema is a collection of type definitions (hence "typeDefs")
 // that together define the "shape" of queries that are executed against
@@ -68,8 +84,20 @@ const resolvers = {
     makeUser: async (root, args) => {
       const user = { ...args }
       console.log(user)
+
+      const hashedPassword = await bcrypt.hash(user.password, 10);
+
       await prisma.user.create({
-        data: user
+        data: {
+          name: user.name,
+          email: user.email,
+          phone_number: user.phone_number,
+          address: user.address,
+          post_code: user.post_code,
+          municipality: user.municipality,
+          username: user.username,
+          password: hashedPassword
+        }
       })
       return user
     }
