@@ -10,6 +10,7 @@ import bcrypt from 'bcryptjs';
 import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
 import JwtStrategyConfiguration from '../utils/passportSetup.js';
+import jwt from 'jsonwebtoken';
 
 dotenv.config();
 
@@ -34,13 +35,17 @@ const typeDefs = `#graphql
   }
 
   type User {
-    email: String
+    email: String!
     name: String!
     phone_number: String!
     address: String!
     post_code: String!
     municipality: String!
-    username: String!
+  }
+
+  type ValidLogin {
+    token: String!
+    message: String!
   }
 
   type Mutation {
@@ -51,9 +56,17 @@ const typeDefs = `#graphql
     address: String!
     post_code: String!
     municipality: String!
-    username: String!
     password: String!
   ): User
+  
+  }
+
+  type Mutation {
+    loginUser (
+    email: String!
+    password: String!
+  ): ValidLogin
+  
   }
 
   # The "Query" type is special: it lists all of the available queries that
@@ -95,12 +108,43 @@ const resolvers = {
           address: user.address,
           post_code: user.post_code,
           municipality: user.municipality,
-          username: user.username,
           password: hashedPassword
         }
       })
       return user
-    }
+    },
+    
+    loginUser: async(root, {email, password}) => {
+      const user = await prisma.user.findUnique({
+        where: {
+          email: email,
+        },
+      });
+  
+      if (!user) {
+        throw new Error('Invalid credentials');
+      }
+  
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) {
+        throw new Error('Invalid credentials');
+      }
+  
+      const jwtPayload = {
+        id: user.id,
+        email: user.email,
+      };
+  
+      const token = jwt.sign(jwtPayload, process.env.SECRET, {
+        expiresIn: '1d',
+      });
+
+
+      return {
+        token,
+        message: 'ok'
+      };
+    },
   }
 };
 
