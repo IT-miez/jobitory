@@ -59,8 +59,7 @@ model User {
   post_code String
   municipality  String
   // avatar Image
-  username String
   password String
-  // createdAt DateTime
+  createdAt DateTime @default(now())
   // updatedAt DateTime
 }
