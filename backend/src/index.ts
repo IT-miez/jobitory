@@ -15,12 +15,12 @@ opts.secretOrKey = process.env.SECRET;
 passport.use(JwtStrategyConfiguration);
 
 const server = new ApolloServer({
-	typeDefs,
-	resolvers,
+    typeDefs,
+    resolvers,
 });
 
 const {url} = await startStandaloneServer(server, {
-	listen: {port: 4000},
+    listen: {port: 4000},
 });
 
 console.log(`🚀  Server ready at: ${url}`);
