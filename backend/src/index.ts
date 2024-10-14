@@ -1,22 +1,19 @@
 import { ApolloServer } from '@apollo/server'; // preserve-line
 import { startStandaloneServer } from '@apollo/server/standalone'; // preserve-line
 import dotenv from 'dotenv';
-// Prisma
 import { PrismaClient } from '@prisma/client'
-const prisma = new PrismaClient() 
-
-// Password security
 import bcrypt from 'bcryptjs';
 import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
-import JwtStrategyConfiguration from '../utils/passportSetup.js';
+import JwtStrategyConfiguration from './utils/passportSetup.js';
 import jwt from 'jsonwebtoken';
-
-dotenv.config();
-
-// JWT SETUP
 import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
+import resolvers from './resolvers.js';
+import typeDefs from './typedefs.js';
 
+
+const prisma = new PrismaClient() 
+dotenv.config();
 const opts: any = {};
 opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
 opts.secretOrKey = process.env.SECRET;
@@ -25,128 +22,10 @@ passport.use(JwtStrategyConfiguration);
 // A schema is a collection of type definitions (hence "typeDefs")
 // that together define the "shape" of queries that are executed against
 // your data.
-const typeDefs = `#graphql
-  # Comments in GraphQL strings (such as this one) start with the hash (#) symbol.
-
-  # This "Book" type defines the queryable fields for every book in our data source.
-  type Book {
-    title: String
-    author: String
-  }
-
-  type User {
-    email: String!
-    name: String!
-    phone_number: String!
-    address: String!
-    post_code: String!
-    municipality: String!
-  }
-
-  type ValidLogin {
-    token: String!
-    message: String!
-  }
-
-  type Mutation {
-    makeUser (
-    email: String!
-    name: String!
-    phone_number: String!
-    address: String!
-    post_code: String!
-    municipality: String!
-    password: String!
-  ): User
-  
-  }
-
-  type Mutation {
-    loginUser (
-    email: String!
-    password: String!
-  ): ValidLogin
-  
-  }
-
-  # The "Query" type is special: it lists all of the available queries that
-  # clients can execute, along with the return type for each. In this
-  # case, the "books" query returns an array of zero or more Books (defined above).
-  type Query {
-    books: [Book]
-  }
-`;
-
-const books = [
-  {
-    title: 'The Awakening',
-    author: 'Kate Chopin',
-  },
-  {
-    title: 'City of Glass',
-    author: 'Paul Auster',
-  },
-];
 
 
-const resolvers = {
-  Query: {
-    books: () => books,
-  },
-  Mutation: {
-    makeUser: async (root, args) => {
-      const user = { ...args }
-      console.log(user)
-
-      const hashedPassword = await bcrypt.hash(user.password, 10);
-
-      await prisma.user.create({
-        data: {
-          name: user.name,
-          email: user.email,
-          phone_number: user.phone_number,
-          address: user.address,
-          post_code: user.post_code,
-          municipality: user.municipality,
-          password: hashedPassword
-        }
-      })
-      return user
-    },
-    
-    loginUser: async(root, {email, password}) => {
-      const user = await prisma.user.findUnique({
-        where: {
-          email: email,
-        },
-      });
-  
-      if (!user) {
-        throw new Error('Invalid credentials');
-      }
-  
-      const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch) {
-        throw new Error('Invalid credentials');
-      }
-  
-      const jwtPayload = {
-        id: user.id,
-        email: user.email,
-      };
-  
-      const token = jwt.sign(jwtPayload, process.env.SECRET, {
-        expiresIn: '1d',
-      });
 
 
-      return {
-        token,
-        message: 'ok'
-      };
-    },
-  }
-};
 
 // The ApolloServer constructor requires two parameters: your schema
 // definition and your set of resolvers.
