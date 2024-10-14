@@ -6,9 +6,7 @@ dist/
 .DS_Store
 .idea
 tmp-resolvers
-package-lock.json
 flow-typed
-yarn.lock
 javascript/**/migrations/
 typescript/**/migrations/
 misc/**/migrations/
@@ -20,5 +18,3 @@ experimental/**/*.db
 dev.db
 *.env*
 !.env.example
-
-*.js

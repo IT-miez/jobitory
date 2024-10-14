@@ -1,45 +1,37 @@
-const typeDefs = `#graphql
-  # Comments in GraphQL strings (such as this one) start with the hash (#) symbol.
+const typeDefs = /* GraphQL */ `
+	#graphql
+	# Comments in GraphQL strings (such as this one) start with the hash (#) symbol.
 
-  type User {
-    email: String!
-    name: String!
-    phone_number: String!
-    address: String!
-    post_code: String!
-    municipality: String!
-  }
+	type User {
+		email: String!
+		name: String!
+		phone_number: String!
+		address: String!
+		post_code: String!
+		municipality: String!
+	}
 
-  type ValidLogin {
-    token: String!
-    message: String!
-  }
+	type ValidLogin {
+		token: String!
+		message: String!
+	}
 
-  type Mutation {
-    makeUser (
-    email: String!
-    name: String!
-    phone_number: String!
-    address: String!
-    post_code: String!
-    municipality: String!
-    password: String!
-  ): User
-  
-  }
+	type Query {
+		accountData(id: String): User
+	}
 
-  type Mutation {
-    loginUser (
-    email: String!
-    password: String!
-  ): ValidLogin
-  
-  }
-  type Query {
-    accountData (
-        id: String
-    ): User
-  }
+	type Mutation {
+		makeUser(
+			email: String!
+			name: String!
+			phone_number: String!
+			address: String!
+			post_code: String!
+			municipality: String!
+			password: String!
+		): User
+		loginUser(email: String!, password: String!): ValidLogin
+	}
 `;
 
-export default typeDefs
+export default typeDefs;
