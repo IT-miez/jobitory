@@ -13,53 +13,87 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 // Schemas for the application
 // Commented out parts that are yet to be converted
 // to work with PSQL
 
 model Education {
-  id Int @id @default(autoincrement())
-  school_name String
-  city String
-  degree String
-  subject String
-  //from DateTime
-  //to DateTime | null
+  id                     Int      @id @default(autoincrement())
+  school_name            String
+  city                   String
+  degree                 String
+  subject                String
+  from                   DateTime
+  to                     DateTime
   additional_information String
+  userdata_id            Int
+  user                   UserData @relation(fields: [userdata_id], references: [id])
 }
 
 model Experience {
-  id Int @id @default(autoincrement())
-  company_name String
-  position String
-  city String
-  //from DateTime
-  // to DateTime
+  id                     Int       @id @default(autoincrement())
+  company_name           String
+  position               String
+  city                   String
+  from                   DateTime
+  to                     DateTime?
   additional_Information String
+  userdata_id            Int
+  user                   UserData  @relation(fields: [userdata_id], references: [id])
 }
 
 // Note!
-// Add models for CV, Certificates and Custom_Box here
+// Add models for CV here
+
+model Certificate {
+  id                     Int       @id @default(autoincrement())
+  title                  String
+  issuing_organization   String
+  issue_date             DateTime
+  expiration_date        DateTime?
+  certificate_url        String?
+  additional_information String?
+  //userId            Int      
+  // relation to what field?
+}
+
+model Custom_Box {
+  id            Int      @id @default(autoincrement())
+  title         String
+  string_titles String[]
+  text_content  String[]
+  //userId            Int
+  // relation to what field?    
+}
 
 model Job {
-  id Int @id @default(autoincrement()) 
-  position String
-  status String
+  id                     Int    @id @default(autoincrement())
+  position               String
+  status                 String
   additional_information String
-  url String
+  url                    String
 }
 
 model User {
-  id      Int      @id @default(autoincrement())
-  email   String   @unique
-  name    String?
+  id           Int       @id @default(autoincrement())
+  email        String    @unique
+  first_name   String
+  last_name    String
   phone_number String
-  address String
-  post_code String
-  municipality  String
+  address      String
+  post_code    String
+  municipality String
   // avatar Image
-  password String
-  createdAt DateTime @default(now())
-  // updatedAt DateTime
+  password     String
+  created_at   DateTime  @default(now())
+  updated_at   DateTime  @updatedAt
+  userdata     UserData?
+}
+
+model UserData {
+  id          Int          @id @default(autoincrement())
+  educations  Education[]
+  experiences Experience[]
+  user_id     Int          @unique
+  user        User         @relation(fields: [user_id], references: [id])
 }

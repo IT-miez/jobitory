@@ -4,7 +4,8 @@ const typeDefs = /* GraphQL */ `
 
     type User {
         email: String!
-        name: String!
+        first_name: String!
+        last_name: String!
         phone_number: String!
         address: String!
         post_code: String!
@@ -23,7 +24,8 @@ const typeDefs = /* GraphQL */ `
     type Mutation {
         makeUser(
             email: String!
-            name: String!
+            first_name: String!
+            last_name: String!
             phone_number: String!
             address: String!
             post_code: String!
