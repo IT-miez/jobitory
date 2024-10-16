@@ -76,6 +76,9 @@ const resolvers = {
             return {
                 token,
                 message: 'ok',
+                email: user.email,
+                first_name: user.first_name,
+                last_name: user.last_name,
             };
         },
         uploadImage: async (root, {image, email}) => {},
