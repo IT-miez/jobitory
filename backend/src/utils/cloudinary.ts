@@ -12,7 +12,7 @@ cloudinary.v2.config({
 });
 
 const upload = async (image) => {
-    const {createReadStream} = image;
+    const {createReadStream} = await image;
     const stream = createReadStream();
     const sharpImage = sharp().webp({quality: 75});
 

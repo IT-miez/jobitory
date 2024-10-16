@@ -12,9 +12,19 @@ export function SignUp() {
     const [lastName, setLastName] = useState('');
     const [email, setEmail] = useState('');
     const [phoneNumber, setPhoneNumber] = useState('');
+    const [image, setImage] = useState<File | undefined>();
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
+
+    const handleFileChange = (event: SyntheticEvent<HTMLInputElement>) => {
+        const inputFileElement = event.target as HTMLInputElement;
+        if (!inputFileElement.files) {
+            setImage(undefined);
+            return;
+        }
+        setImage(inputFileElement.files[0]);
+    };
 
     async function onSubmit(event: SyntheticEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -24,9 +34,7 @@ export function SignUp() {
             return;
         }
 
-        if (mutationError) {
-            debugger;
-        }
+        console.log(image);
 
         await signUp({
             variables: {
@@ -35,6 +43,7 @@ export function SignUp() {
                 last_name: lastName,
                 phone_number: phoneNumber,
                 password: password,
+                image,
             },
         });
     }
@@ -61,8 +70,8 @@ export function SignUp() {
                     </Text>
                 </div>
                 <form onSubmit={onSubmit} className="flex flex-col gap-2">
-                    <div className="flex gap-2">
-                        <div className="flex flex-col gap-2">
+                    <div className="flex flex-col gap-2">
+                        <div className="flex gap-2">
                             <TextField
                                 onChange={setFirstName}
                                 label="First name"
@@ -70,16 +79,6 @@ export function SignUp() {
                                 type="text"
                                 name="first_name"
                             />
-                            <TextField onChange={setEmail} label="Email" placeholder="Email" type="text" name="email" />
-                            <TextField
-                                onChange={setPassword}
-                                label="Password"
-                                placeholder="Password"
-                                type="password"
-                                name="password"
-                            />
-                        </div>
-                        <div className="flex flex-col gap-2">
                             <TextField
                                 onChange={setLastName}
                                 label="Last name"
@@ -87,12 +86,24 @@ export function SignUp() {
                                 type="text"
                                 name="last_name"
                             />
+                        </div>
+                        <div className="flex gap-2">
+                            <TextField onChange={setEmail} label="Email" placeholder="Email" type="text" name="email" />
                             <TextField
                                 onChange={setPhoneNumber}
                                 label="Phone number"
                                 placeholder="Phone number"
                                 type="text"
                                 name="phone_number"
+                            />
+                        </div>
+                        <div className="flex gap-2">
+                            <TextField
+                                onChange={setPassword}
+                                label="Password"
+                                placeholder="Password"
+                                type="password"
+                                name="password"
                             />
                             <TextField
                                 onChange={setConfirmPassword}
@@ -102,6 +113,7 @@ export function SignUp() {
                                 name="password"
                             />
                         </div>
+                        <input type="file" accept="image/png, image/jpeg" onChange={handleFileChange} />
                         {error && <InlineAlert color={'error'} message={error} />}
                     </div>
                     <Button type="submit" className="mt-4" color="primary">

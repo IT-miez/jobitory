@@ -1,6 +1,9 @@
-import {ApolloLink, concat, HttpLink} from '@apollo/client';
+import {ApolloLink, concat} from '@apollo/client';
+import createUploadLink from 'apollo-upload-client/createUploadLink.mjs';
 
-const httpLink = new HttpLink({uri: 'http://localhost:4000/graphql'});
+const uploadLink = createUploadLink({
+    uri: 'http://localhost:4000/graphql',
+});
 
 const authMiddleware = new ApolloLink((operation, forward) => {
     const token = localStorage.getItem('auth_token');
@@ -9,10 +12,11 @@ const authMiddleware = new ApolloLink((operation, forward) => {
         headers: {
             ...headers,
             authorization: token ? `bearer ${token}` : null,
+            'Apollo-Require-Preflight': 'true',
         },
     }));
 
     return forward(operation);
 });
 
-export default concat(authMiddleware, httpLink);
+export default concat(authMiddleware, uploadLink);

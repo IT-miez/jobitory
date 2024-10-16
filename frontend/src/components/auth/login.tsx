@@ -22,7 +22,8 @@ export function Login() {
 
     useEffect(() => {
         if (data?.loginUser?.token) {
-            localStorage.setItem('aut_token', data.loginUser.token);
+            debugger;
+            localStorage.setItem('auth_token', data.loginUser.token);
 
             navigate('/dashboard');
         }
