@@ -2,14 +2,17 @@ const typeDefs = /* GraphQL */ `
     #graphql
     # Comments in GraphQL strings (such as this one) start with the hash (#) symbol.
 
+    scalar Upload
+
     type User {
         email: String!
         first_name: String!
         last_name: String!
-        phone_number: String!
-        address: String!
-        post_code: String!
-        municipality: String!
+        phone_number: String
+        address: String
+        post_code: String
+        municipality: String
+        image: Upload
     }
 
     type ValidLogin {
@@ -26,10 +29,10 @@ const typeDefs = /* GraphQL */ `
             email: String!
             first_name: String!
             last_name: String!
-            phone_number: String!
-            address: String!
-            post_code: String!
-            municipality: String!
+            phone_number: String
+            address: String
+            post_code: String
+            municipality: String
             password: String!
         ): User
         loginUser(email: String!, password: String!): ValidLogin

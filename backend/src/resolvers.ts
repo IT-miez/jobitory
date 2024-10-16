@@ -1,10 +1,12 @@
 import {PrismaClient} from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import GraphQLUpload from 'graphql-upload/GraphQLUpload.mjs';
 
 const prisma = new PrismaClient();
 
 const resolvers = {
+    Upload: GraphQLUpload,
     Query: {
         accountData: (givenId) => prisma.user.findUnique({where: {id: givenId}}),
     },
