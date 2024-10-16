@@ -2,6 +2,8 @@ import {PrismaClient} from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import GraphQLUpload from 'graphql-upload/GraphQLUpload.mjs';
+import upload from './utils/cloudinary';
+import {GraphQLError} from 'graphql';
 
 const prisma = new PrismaClient();
 
@@ -13,10 +15,16 @@ const resolvers = {
     Mutation: {
         makeUser: async (root, args) => {
             const user = {...args};
+            let imageURL = null;
 
             const hashedPassword = await bcrypt.hash(user.password, 10);
 
             if (user.image) {
+                try {
+                    imageURL = await upload(user.image);
+                } catch (error) {
+                    throw new GraphQLError('Error on image upload');
+                }
             }
 
             await prisma.user.create({
@@ -29,8 +37,14 @@ const resolvers = {
                     post_code: user.post_code,
                     municipality: user.municipality,
                     password: hashedPassword,
+                    image: {
+                        create: {
+                            cloudinary_url: imageURL,
+                        },
+                    },
                 },
             });
+
             return user;
         },
 
@@ -42,12 +56,12 @@ const resolvers = {
             });
 
             if (!user) {
-                throw new Error('Invalid credentials');
+                throw new GraphQLError('Invalid credentials');
             }
 
             const isMatch = await bcrypt.compare(password, user.password);
             if (!isMatch) {
-                throw new Error('Invalid credentials');
+                throw new GraphQLError('Invalid credentials');
             }
 
             const jwtPayload = {
