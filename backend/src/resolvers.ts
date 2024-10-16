@@ -2,7 +2,7 @@ import {PrismaClient} from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import GraphQLUpload from 'graphql-upload/GraphQLUpload.mjs';
-import upload from './utils/cloudinary';
+import upload from './utils/cloudinary.js';
 import {GraphQLError} from 'graphql';
 
 const prisma = new PrismaClient();
@@ -81,7 +81,6 @@ const resolvers = {
                 last_name: user.last_name,
             };
         },
-        uploadImage: async (root, {image, email}) => {},
     },
 };
 
