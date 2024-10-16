@@ -34,8 +34,6 @@ export function SignUp() {
             return;
         }
 
-        console.log(image);
-
         await signUp({
             variables: {
                 email,

@@ -1,9 +1,9 @@
-import {ReactElement} from 'react';
+import {Outlet} from 'react-router-dom';
 
-interface PageContainerProps {
-    children: ReactElement | null;
-}
-
-export function PageContainer({children}: PageContainerProps) {
-    return <main className="flex flex-col justify-center items-center h-screen">{children}</main>;
+export function PageContainer() {
+    return (
+        <main className="flex flex-col justify-center items-center h-screen">
+            <Outlet />
+        </main>
+    );
 }

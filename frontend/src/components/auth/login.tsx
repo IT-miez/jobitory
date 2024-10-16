@@ -3,6 +3,7 @@ import {useMutation} from '@apollo/client';
 import {LOGIN_USER} from '../graphql/mutations.ts';
 import {SyntheticEvent, useEffect, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
+import {storageKeys} from '../../constants/storagekeys.ts';
 
 export function Login() {
     const [login, {data}] = useMutation(LOGIN_USER);
@@ -22,8 +23,7 @@ export function Login() {
 
     useEffect(() => {
         if (data?.loginUser?.token) {
-            debugger;
-            localStorage.setItem('auth_token', data.loginUser.token);
+            localStorage.setItem(storageKeys.auth_token, data.loginUser.token);
 
             navigate('/dashboard');
         }
