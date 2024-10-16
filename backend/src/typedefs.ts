@@ -34,7 +34,7 @@ const typeDefs = /* GraphQL */ `
             post_code: String
             municipality: String
             password: String!
-            image: String
+            image: Upload
         ): User
         loginUser(email: String!, password: String!): ValidLogin
     }
