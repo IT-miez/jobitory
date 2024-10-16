@@ -40,7 +40,7 @@ const resolvers = {
                     password: hashedPassword,
                     image: {
                         create: {
-                            cloudinary_url: imageURL,
+                            cloudinary_url: imageURL.url,
                         },
                     },
                 },
