@@ -16,6 +16,9 @@ const resolvers = {
 
             const hashedPassword = await bcrypt.hash(user.password, 10);
 
+            if (user.image) {
+            }
+
             await prisma.user.create({
                 data: {
                     first_name: user.first_name,
@@ -61,6 +64,7 @@ const resolvers = {
                 message: 'ok',
             };
         },
+        uploadImage: async (root, {image, email}) => {},
     },
 };
 
