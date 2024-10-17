@@ -1,10 +1,6 @@
-import {StrictMode} from 'react';
 import {createRoot} from 'react-dom/client';
-import App from './App.tsx';
-import './index.css';
+import Router from './router.tsx';
+import '@topihenrik/funktia/dist/index.css';
+import './main.css';
 
-createRoot(document.getElementById('root')!).render(
-    <StrictMode>
-        <App />
-    </StrictMode>
-);
+createRoot(document.getElementById('root')!).render(<Router />);

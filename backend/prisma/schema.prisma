@@ -74,16 +74,23 @@ model Job {
   url                    String
 }
 
+model Image {
+  id             Int     @id @default(autoincrement())
+  cloudinary_url String?
+  user_id        Int     @unique
+  user           User    @relation(fields: [user_id], references: [id])
+}
+
 model User {
   id           Int       @id @default(autoincrement())
   email        String    @unique
   first_name   String
   last_name    String
-  phone_number String
-  address      String
-  post_code    String
-  municipality String
-  // avatar Image
+  phone_number String?
+  address      String?
+  post_code    String?
+  municipality String?
+  image        Image?
   password     String
   created_at   DateTime  @default(now())
   updated_at   DateTime  @updatedAt
