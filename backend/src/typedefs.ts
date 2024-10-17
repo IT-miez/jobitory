@@ -24,7 +24,8 @@ const typeDefs = /* GraphQL */ `
     }
 
     type Query {
-        accountData(id: String): User
+        accountData(id: String): User,
+        profileData(email: String): User,
     }
 
     type Mutation {
