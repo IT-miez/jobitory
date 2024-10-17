@@ -11,6 +11,41 @@ const resolvers = {
     Upload: GraphQLUpload,
     Query: {
         accountData: (givenId) => prisma.user.findUnique({where: {id: givenId}}),
+        profileData: async (root, args) => {
+            const { email } = args;
+
+            if (!email) {
+                throw new GraphQLError('Email argument is required');
+            }
+            const userProfile = await prisma.user.findUnique({
+                where: {
+                    email: email,
+                },
+                select: {
+                    email: true,
+                    first_name: true,
+                    last_name: true,
+                    phone_number: true,
+                    address: true,
+                    post_code: true,
+                    municipality: true,
+                    image: {
+                        select: {
+                            cloudinary_url: true,
+                        }
+                    }
+                },
+            });
+
+            if (!userProfile) {
+                throw new GraphQLError(`User with email ${email} not found`);
+            }
+
+            return {
+                ...userProfile,
+                image_url: userProfile.image ? userProfile.image.cloudinary_url : null,
+            };
+        }
     },
     Mutation: {
         makeUser: async (root, args) => {
