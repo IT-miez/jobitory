@@ -41,7 +41,10 @@ const resolvers = {
                 throw new GraphQLError(`User with email ${email} not found`);
             }
 
-            return userProfile;
+            return {
+                ...userProfile,
+                image_url: userProfile.image ? userProfile.image.cloudinary_url : null,
+            };
         }
     },
     Mutation: {
