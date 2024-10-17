@@ -118,6 +118,11 @@ const resolvers = {
                 last_name: user.last_name,
             };
         },
+        deleteUser: async (root, {email}) => {
+
+
+            return {};
+        },
     },
 };
 

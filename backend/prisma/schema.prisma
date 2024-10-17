@@ -78,7 +78,7 @@ model Image {
   id             Int     @id @default(autoincrement())
   cloudinary_url String?
   user_id        Int     @unique
-  user           User    @relation(fields: [user_id], references: [id])
+  user           User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 
 model User {
