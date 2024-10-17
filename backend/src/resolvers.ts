@@ -11,8 +11,12 @@ const resolvers = {
     Upload: GraphQLUpload,
     Query: {
         accountData: (givenId) => prisma.user.findUnique({where: {id: givenId}}),
-        profileData: async (email) => {
+        profileData: async (root, args) => {
+            const { email } = args;
 
+            if (!email) {
+                throw new GraphQLError('Email argument is required');
+            }
             const userProfile = await prisma.user.findUnique({
                 where: {
                     email: email,
