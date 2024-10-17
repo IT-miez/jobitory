@@ -24,6 +24,7 @@ const resolvers = {
                     imageURL = await upload(user.image);
                     console.log(imageURL);
                 } catch (error) {
+                    console.log(error);
                     throw new GraphQLError('Error on image upload');
                 }
             }

@@ -5,7 +5,7 @@ import {useNavigate} from 'react-router-dom';
 import {SyntheticEvent, useEffect, useState} from 'react';
 
 export function SignUp() {
-    const [signUp, {data, error: mutationError}] = useMutation(MAKE_USER);
+    const [signUp, {data}] = useMutation(MAKE_USER);
     const navigate = useNavigate();
 
     const [firstName, setFirstName] = useState('');
