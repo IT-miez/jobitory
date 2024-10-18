@@ -11,6 +11,8 @@ import typeDefs from './typedefs.js';
 import passport from 'passport';
 import JwtStrategyConfiguration from './utils/passportSetup.js';
 import { jwtDecode } from "jwt-decode";
+import {PrismaClient} from '@prisma/client';
+const prisma = new PrismaClient();
 
 dotenv.config();
 passport.use(JwtStrategyConfiguration);
@@ -32,22 +34,6 @@ const server = new ApolloServer<AuthContext>({
     typeDefs,
     resolvers,
     plugins: [ApolloServerPluginDrainHttpServer({httpServer})],
-    context: async ({ req }: ExpressContext): Promise<AuthContext> => {
-        const token = req.headers.authorization || '';
-
-        let user;
-        try {
-            if (token) {
-                user = await jwtDecode(token);
-            }
-        } catch (error) {
-            console.error('Invalid token:', error);
-        }
-
-        return {
-            user,
-        };
-    },
 });
 await server.start();
 
@@ -59,19 +45,32 @@ app.use(
     expressMiddleware(server, {
         context: async ({ req }) => {
 
-            const token = req.headers.token || '';
+            let token = req.headers.authorization || '';
+            console.log("Token is ", token)
+            if (Array.isArray(token)) {
+                token = token[0];
+            }
+
+            token = token || '';
             console.log('Extracted token:', token);
 
             let user = null;
+            let tokenUser = null;
             if (token) {
-                user = await jwtDecode(token);
+                tokenUser = await jwtDecode(token);
             }
+            if (tokenUser) {
+                console.log("Tokenuser is ",tokenUser)
+                user =  await prisma.user.findUnique({where: {email: tokenUser.email}})
+            }
+
 
             console.log('Context user:', user);
 
             return {
                 user,
             };
+        }
     })
 
 );

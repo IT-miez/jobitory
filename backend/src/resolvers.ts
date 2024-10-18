@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import GraphQLUpload from 'graphql-upload/GraphQLUpload.mjs';
 import upload from './utils/cloudinary.js';
 import {GraphQLError} from 'graphql';
+import cloudinary from 'cloudinary';
 
 const prisma = new PrismaClient();
 
@@ -77,6 +78,7 @@ const resolvers = {
                     image: {
                         create: {
                             cloudinary_url: imageURL.url,
+                            cloudinary_public_id: imageURL.public_id
                         },
                     },
                 },
@@ -118,12 +120,113 @@ const resolvers = {
                 last_name: user.last_name,
             };
         },
-        deleteUser: async (root, {email}) => {
+        deleteUser: async (root, {email}, context) => {
+            console.log(context)
+            if (!context.user || !context.user.email) {
+                console.log("User is undefined or email is missing");
+                throw new GraphQLError('User not authenticated');
+            }
 
+            if (context.user.email !== email) {
+                console.log("not the same email")
+                throw new GraphQLError('You are not authorized to delete this user');
+            }
 
-            return {};
+            if (context.user.email == email) {
+                console.log("SAME EMAIL")
+            }
+
+            try {
+                const userInfo = await prisma.user.findUnique({where: {email: context.user.email}});
+                console.log(userInfo)
+                console.log(userInfo.id)
+
+                const deletedImage = await prisma.image.delete({where: {user_id: userInfo.id}})
+
+                const deletedUser = await prisma.user.delete({
+                    where: {
+                        email: email
+                    }
+                });
+                console.log(deletedUser)
+
+                return {
+                    message: `Deleted user with email: ${deletedUser.email}`
+                };
+
+            } catch (error) {
+                console.log("FUll errror", error)
+                throw new GraphQLError(`Error deleting user: ${error.message}`);
+            }
         },
-    },
+        updateUser: async (root, {input}, context) => {
+            const {user} = context;
+
+            if (!user || !user.email) {
+                throw new GraphQLError('User not authenticated');
+            }
+
+            const {
+                email,
+                first_name,
+                last_name,
+                phone_number,
+                address,
+                post_code,
+                municipality,
+                image,
+            } = input;
+
+            let imageURL;
+
+            cloudinary.v2.uploader
+                .destroy(user.image.cloudinary_public_id)
+                .then(result => console.log(result));
+
+            if (image) {
+                try {
+                    imageURL = await upload(image);
+                    console.log("Uploaded Image URL:", imageURL);
+                } catch (error) {
+                    console.error("Error uploading image:", error);
+                    throw new GraphQLError('Error on image upload');
+                }
+            }
+
+            try {
+                const updateData = {
+                    email,
+                    first_name,
+                    last_name,
+                    phone_number,
+                    address,
+                    post_code,
+                    municipality,
+                    ...(imageURL && {
+                        image: {
+                            upsert: {
+                                create: {cloudinary_url: imageURL.url, cloudinary_public_id: imageURL.public_id},
+                                update: {cloudinary_url: imageURL.url, cloudinary_public_id: imageURL.public_id},
+                            },
+                        },
+                    }),
+                };
+
+                const updatedUser = await context.prisma.user.update({
+                    where: {email: user.email},
+                    data: updateData,
+                });
+
+                return {
+                    message: 'User updated successfully',
+                    user: updatedUser,
+                };
+            } catch (error) {
+                console.error("Error updating user:", error);
+                throw new GraphQLError(`Error updating user: ${error.message}`);
+            }
+        },
+    }
 };
 
 export default resolvers;
