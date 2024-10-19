@@ -37,7 +37,7 @@ model Experience {
   city                   String
   from                   DateTime
   to                     DateTime?
-  additional_Information String
+  additional_information String
   userdata_id            Int
   user                   UserData  @relation(fields: [userdata_id], references: [id])
 }

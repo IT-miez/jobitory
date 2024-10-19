@@ -226,6 +226,58 @@ const resolvers = {
                 throw new GraphQLError(`Error updating user: ${error.message}`);
             }
         },
+        createExperience: async (root, input, context) => {
+            const userArgs = input.input
+            if (!context.user || !context.user.email) {
+                throw new GraphQLError('User not authenticated');
+            }
+
+            try {
+                let userData = await prisma.userData.findUnique({
+                    where: {
+                        id: context.user.id,
+                    },
+                });
+
+                if (!userData) {
+                    userData = await prisma.userData.create({
+                        data: {
+                            user: {
+                                connect: {
+                                    id: context.user.id,
+                                },
+                            },
+                        },
+                    });
+                }
+
+                // Create the new Experience
+                const newExperience = await prisma.experience.create({
+                    data: {
+                        company_name: userArgs.company_name,
+                        position: userArgs.position,
+                        city: userArgs.city,
+                        from: userArgs.from,
+                        to: userArgs.to,
+                        additional_information: userArgs.additional_information,
+                        user: {
+                            connect: {
+                                id: userData.id,
+                            },
+                        },
+                    },
+                });
+                console.log("NEW EXPERIENCE:")
+                console.log(newExperience)
+                return {
+                    message: 'Experience created successfully',
+                    experience: newExperience,
+                };
+            } catch (error) {
+                console.error("Error creating experience:", error);
+                throw new GraphQLError(`Error creating experience: ${error.message}`);
+            }
+        },
     }
 };
 
