@@ -37,9 +37,19 @@ const typeDefs = /* GraphQL */ `
         additional_information: String!
     }
 
+    type ExperienceData {
+        company_name: String
+        position: String
+        city: String
+        from: String
+        to: String
+        additional_Information: String
+    }
+
     type Query {
         accountData(id: String): User,
         profileData(email: String): User,
+        experiencesData(email: String): [ExperienceData!]!,
     }
 
     input UpdateUserInput {
@@ -71,6 +81,27 @@ const typeDefs = /* GraphQL */ `
         additional_information: String!
     }
     
+    input Education {
+        id: Int!
+        school_name: String
+        city:String
+        degree:String
+        subject: String
+        from: String
+        to: String
+        additional_information: String
+    }
+    
+    type  EducationOutput {
+        school_name: String!
+        city: String!
+        degree: String!
+        subject: String!
+        from: String
+        to: String
+        additional_information: String!
+    }
+    
     type UpdateUserResponse {
         message: String
         user: User
@@ -91,7 +122,10 @@ const typeDefs = /* GraphQL */ `
         loginUser(email: String!, password: String!): ValidLogin,
         deleteUser(email: String!):deleteResult,
         updateUser(input: UpdateUserInput!): UpdateUserResponse,
-        createExperience(input: ExperienceInput): ExperienceOutput
+        createExperience(input: ExperienceInput): ExperienceOutput,
+        deleteExperience(experience_id: Int!):deleteResult,
+        createEducation(input: Education!): EducationOutput,
+        deleteEducation(education_id: Int!):deleteResult,
     }
 `;
 

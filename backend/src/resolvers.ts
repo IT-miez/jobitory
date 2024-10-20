@@ -46,8 +46,45 @@ const resolvers = {
                 ...userProfile,
                 image_url: userProfile.image ? userProfile.image.cloudinary_url : null,
             };
-        }
+        },
+        experiencesData: async (root, args, context) => {
+            if (!context.user || !args.email) {
+                throw new GraphQLError('User not authenticated');
+            }
+
+            try {
+                const userData = await prisma.userData.findUnique({
+                    where: {
+                        user_id: context.user.id,
+                    },
+                    include: {
+                        experiences: true,
+                    },
+                });
+
+                if (!userData || !userData.experiences) {
+                    return [];
+                }
+
+                const experiencesWithoutIds = userData.experiences.map(exp => ({
+                    company_name: exp.company_name,
+                    position: exp.position,
+                    city: exp.city,
+                    from: exp.from.toISOString(),  // Convert Date to ISO string
+                    to: exp.to ? exp.to.toISOString() : null,  // Convert Date to ISO string, handle null
+                    additional_information: exp.additional_information,
+                }));
+                console.log(experiencesWithoutIds)
+                return experiencesWithoutIds;
+
+            } catch (error) {
+                console.error("Error fetching experiences:", error);
+                throw new GraphQLError(`Error fetching experiences: ${error.message}`);
+            }
+
+        },
     },
+
     Mutation: {
         makeUser: async (root, args) => {
             const user = {...args};
@@ -278,6 +315,74 @@ const resolvers = {
                 throw new GraphQLError(`Error creating experience: ${error.message}`);
             }
         },
+        deleteExperience: async (root, args, context) => {
+            const experience_id = args.experience_id
+            if (!context.user || !context.user.email) {
+                throw new GraphQLError('User not authenticated');
+            }
+
+            try {
+                const experience = await prisma.experience.findUnique({
+                    where: {
+                        id: experience_id,
+                    },
+                    include: {
+                        user: true, // Include user data to check ownership
+                    },
+                });
+
+                if (!experience || experience.user.user_id !== context.user.id) {
+                    throw new GraphQLError('Experience not found or not authorized to delete');
+                }
+
+                const deletedExperience = await prisma.experience.delete({
+                    where: {
+                        id: experience_id,
+                    },
+                });
+
+                return {
+                    message: `Deleted experience with id: ${deletedExperience.id}`,
+                };
+            } catch (error) {
+                console.error("Error deleting experience:", error);
+                throw new GraphQLError(`Error deleting experience: ${error.message}`);
+            }
+        },
+        deleteEducation: async (root, args, context) => {
+            const education_id = args.education_id
+            if (!context.user || !context.user.email) {
+                throw new GraphQLError('User not authenticated');
+            }
+            try {
+                const experience = await prisma.education.findUnique({
+                    where: {
+                        id: education_id,
+                    },
+                    include: {
+                        user: true,
+                    },
+                });
+
+                if (!experience || experience.user.user_id !== context.user.id) {
+                    throw new GraphQLError('Education not found or not authorized to delete');
+                }
+
+                const deletedExperience = await prisma.education.delete({
+                    where: {
+                        id: education_id,
+                    },
+                });
+
+                return {
+                    message: `Deleted education with id: ${deletedExperience.id}`,
+                };
+            } catch (error) {
+                console.error("Error deleting education:", error);
+                throw new GraphQLError(`Error deleting education: ${error.message}`);
+            }
+        },
+
     }
 };
 

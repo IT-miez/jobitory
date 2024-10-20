@@ -27,7 +27,7 @@ model Education {
   to                     DateTime
   additional_information String
   userdata_id            Int
-  user                   UserData @relation(fields: [userdata_id], references: [id])
+  user                   UserData @relation(fields: [userdata_id], references: [id], onDelete: Cascade)
 }
 
 model Experience {
@@ -39,7 +39,7 @@ model Experience {
   to                     DateTime?
   additional_information String
   userdata_id            Int
-  user                   UserData  @relation(fields: [userdata_id], references: [id])
+  user                   UserData  @relation(fields: [userdata_id], references: [id], onDelete: Cascade)
 }
 
 // Note!
@@ -103,5 +103,5 @@ model UserData {
   educations  Education[]
   experiences Experience[]
   user_id     Int          @unique
-  user        User         @relation(fields: [user_id], references: [id])
+  user        User         @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
