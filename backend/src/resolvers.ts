@@ -2,7 +2,7 @@ import {PrismaClient} from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import GraphQLUpload from 'graphql-upload/GraphQLUpload.mjs';
-import upload from './utils/cloudinary.js';
+import {upload, deleteCloudinaryImage} from './utils/cloudinary.js';
 import {GraphQLError} from 'graphql';
 import cloudinary from 'cloudinary';
 
@@ -74,7 +74,6 @@ const resolvers = {
                     to: exp.to ? exp.to.toISOString() : null,  // Convert Date to ISO string, handle null
                     additional_information: exp.additional_information,
                 }));
-                console.log(experiencesWithoutIds)
                 return experiencesWithoutIds;
 
             } catch (error) {
@@ -111,7 +110,6 @@ const resolvers = {
                     to: edu.to ? edu.to.toISOString() : null,  // Convert Date to ISO string, handle null
                     additional_information: edu.additional_information,
                 }));
-                console.log(educationsWithoutIds)
                 return educationsWithoutIds;
 
             } catch (error) {
@@ -132,9 +130,8 @@ const resolvers = {
             if (user.image) {
                 try {
                     imageURL = await upload(user.image);
-                    console.log(imageURL);
                 } catch (error) {
-                    console.log(error);
+                    console.error(error)
                     throw new GraphQLError('Error on image upload');
                 }
             }
@@ -195,45 +192,36 @@ const resolvers = {
             };
         },
         deleteUser: async (root, {email}, context) => {
-            console.log(context)
             if (!context.user || !context.user.email) {
-                console.log("User is undefined or email is missing");
+                console.error("User is undefined or email is missing");
                 throw new GraphQLError('User not authenticated');
             }
 
             if (context.user.email !== email) {
-                console.log("not the same email")
+                console.error("not the same email")
                 throw new GraphQLError('You are not authorized to delete this user');
             }
 
-            if (context.user.email == email) {
-                console.log("SAME EMAIL")
-            }
 
             try {
                 const userInfo = await prisma.user.findUnique({where: {email: context.user.email}});
-                console.log(userInfo)
-                console.log(userInfo.id)
 
                 const deletedImage = await prisma.image.delete({where: {user_id: userInfo.id}})
 
-                cloudinary.v2.uploader
-                    .destroy(deletedImage.cloudinary_public_id)
-                    .then(result => console.log("Cloudinary delete result:",result));
+
+                await deleteCloudinaryImage(deletedImage.cloudinary_public_id)
 
                 const deletedUser = await prisma.user.delete({
                     where: {
                         email: email
                     }
                 });
-                console.log(deletedUser)
 
                 return {
                     message: `Deleted user with email: ${deletedUser.email}`
                 };
 
             } catch (error) {
-                console.log("FUll errror", error)
                 throw new GraphQLError(`Error deleting user: ${error.message}`);
             }
         },
@@ -257,14 +245,12 @@ const resolvers = {
 
             let imageURL;
 
-            cloudinary.v2.uploader
+            await cloudinary.v2.uploader
                 .destroy(user.image.cloudinary_public_id)
-                .then(result => console.log(result));
 
             if (image) {
                 try {
                     imageURL = await upload(image);
-                    console.log("Uploaded Image URL:", imageURL);
                 } catch (error) {
                     console.error("Error uploading image:", error);
                     throw new GraphQLError('Error on image upload');
@@ -437,9 +423,8 @@ const resolvers = {
                     throw new GraphQLError('No image found for the user.');
                 }
 
-                cloudinary.v2.uploader
-                    .destroy(userImage.cloudinary_public_id)
-                    .then(result => console.log("Cloudinary delete result:",result));
+
+                await deleteCloudinaryImage(userImage.cloudinary_public_id)
 
                 await prisma.image.delete({
                     where: {

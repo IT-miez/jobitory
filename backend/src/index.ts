@@ -46,13 +46,11 @@ app.use(
         context: async ({ req }) => {
 
             let token = req.headers.authorization || '';
-            console.log("Token is ", token)
             if (Array.isArray(token)) {
                 token = token[0];
             }
 
             token = token || '';
-            console.log('Extracted token:', token);
 
             let user = null;
             let tokenUser = null;
@@ -60,12 +58,10 @@ app.use(
                 tokenUser = await jwtDecode(token);
             }
             if (tokenUser) {
-                console.log("Tokenuser is ",tokenUser)
                 user =  await prisma.user.findUnique({where: {email: tokenUser.email}})
             }
 
 
-            console.log('Context user:', user);
 
             return {
                 user,
