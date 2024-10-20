@@ -27,7 +27,7 @@ model Education {
   to                     DateTime
   additional_information String
   userdata_id            Int
-  user                   UserData @relation(fields: [userdata_id], references: [id])
+  user                   UserData @relation(fields: [userdata_id], references: [id], onDelete: Cascade)
 }
 
 model Experience {
@@ -37,9 +37,9 @@ model Experience {
   city                   String
   from                   DateTime
   to                     DateTime?
-  additional_Information String
+  additional_information String
   userdata_id            Int
-  user                   UserData  @relation(fields: [userdata_id], references: [id])
+  user                   UserData  @relation(fields: [userdata_id], references: [id], onDelete: Cascade)
 }
 
 // Note!
@@ -75,10 +75,11 @@ model Job {
 }
 
 model Image {
-  id             Int     @id @default(autoincrement())
-  cloudinary_url String?
-  user_id        Int     @unique
-  user           User    @relation(fields: [user_id], references: [id])
+  id                   Int     @id @default(autoincrement())
+  cloudinary_url       String?
+  cloudinary_public_id String?
+  user_id              Int     @unique
+  user                 User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 
 model User {
@@ -102,5 +103,5 @@ model UserData {
   educations  Education[]
   experiences Experience[]
   user_id     Int          @unique
-  user        User         @relation(fields: [user_id], references: [id])
+  user        User         @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
