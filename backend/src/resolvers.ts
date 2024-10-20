@@ -83,6 +83,43 @@ const resolvers = {
             }
 
         },
+        educationsData: async (root, args, context) => {
+            if (!context.user || !args.email) {
+                throw new GraphQLError('User not authenticated');
+            }
+
+            try {
+                const userData = await prisma.userData.findUnique({
+                    where: {
+                        user_id: context.user.id,
+                    },
+                    include: {
+                        educations: true,
+                    },
+                });
+
+                if (!userData || !userData.educations) {
+                    return [];
+                }
+
+                const educationsWithoutIds = userData.educations.map(edu => ({
+                    school_name: edu.school_name,
+                    degree: edu.degree,
+                    subject: edu.subject,
+                    city: edu.city,
+                    from: edu.from.toISOString(),  // Convert Date to ISO string
+                    to: edu.to ? edu.to.toISOString() : null,  // Convert Date to ISO string, handle null
+                    additional_information: edu.additional_information,
+                }));
+                console.log(educationsWithoutIds)
+                return educationsWithoutIds;
+
+            } catch (error) {
+                console.error("Error fetching experiences:", error);
+                throw new GraphQLError(`Error fetching experiences: ${error.message}`);
+            }
+
+        },
     },
 
     Mutation: {

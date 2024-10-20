@@ -45,11 +45,13 @@ const typeDefs = /* GraphQL */ `
         to: String
         additional_Information: String
     }
+    
 
     type Query {
         accountData(id: String): User,
         profileData(email: String): User,
         experiencesData(email: String): [ExperienceData!]!,
+        educationsData(email: String): [EducationOutput!]!,
     }
 
     input UpdateUserInput {
