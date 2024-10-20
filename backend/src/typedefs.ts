@@ -15,7 +15,7 @@ const typeDefs = /* GraphQL */ `
         image_url: String
     }
     
-    type deleteResult {
+    type DeleteResult {
         message: String
     }
 
@@ -122,13 +122,13 @@ const typeDefs = /* GraphQL */ `
             image: Upload
         ): User
         loginUser(email: String!, password: String!): ValidLogin,
-        deleteUser(email: String!):deleteResult,
+        deleteUser(email: String!):DeleteResult,
         updateUser(input: UpdateUserInput!): UpdateUserResponse,
         createExperience(input: ExperienceInput): ExperienceOutput,
-        deleteExperience(experience_id: Int!):deleteResult,
+        deleteExperience(experience_id: Int!):DeleteResult,
         createEducation(input: Education!): EducationOutput,
-        deleteEducation(education_id: Int!):deleteResult,
-        deleteImage: deleteResult
+        deleteEducation(education_id: Int!):DeleteResult,
+        deleteImage: DeleteResult
     }
 `;
 
