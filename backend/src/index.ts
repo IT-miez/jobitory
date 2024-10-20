@@ -72,5 +72,5 @@ app.use(
 );
 
 httpServer.listen({port: 4000});
-
+// eslint-disable-next-line no-console
 console.log('🚀 Server ready at http://localhost:4000/graphql');
