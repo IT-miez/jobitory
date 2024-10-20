@@ -128,6 +128,7 @@ const typeDefs = /* GraphQL */ `
         deleteExperience(experience_id: Int!):deleteResult,
         createEducation(input: Education!): EducationOutput,
         deleteEducation(education_id: Int!):deleteResult,
+        deleteImage: deleteResult
     }
 `;
 

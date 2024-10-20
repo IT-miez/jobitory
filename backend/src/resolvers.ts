@@ -325,7 +325,6 @@ const resolvers = {
                     });
                 }
 
-                // Create the new Experience
                 const newExperience = await prisma.experience.create({
                     data: {
                         company_name: userArgs.company_name,
@@ -341,8 +340,6 @@ const resolvers = {
                         },
                     },
                 });
-                console.log("NEW EXPERIENCE:")
-                console.log(newExperience)
                 return {
                     message: 'Experience created successfully',
                     experience: newExperience,
@@ -417,6 +414,41 @@ const resolvers = {
             } catch (error) {
                 console.error("Error deleting education:", error);
                 throw new GraphQLError(`Error deleting education: ${error.message}`);
+            }
+        },
+        deleteImage: async (root, args, context) => {
+
+            if (!context.user || !context.user.email) {
+                throw new GraphQLError('User not authenticated');
+            }
+
+            try {
+                const userImage = await prisma.image.findUnique({
+                    where: {
+                        user_id: context.user.id,
+                    }
+                })
+
+                if (!userImage || !userImage.cloudinary_public_id) {
+                    throw new GraphQLError('No image found for the user.');
+                }
+
+                cloudinary.v2.uploader
+                    .destroy(userImage.cloudinary_public_id)
+                    .then(result => console.log("Cloudinary delete result:",result));
+
+                await prisma.image.delete({
+                    where: {
+                        user_id: context.user.id, // Ensure the image record is removed
+                    },
+                });
+
+                return {
+                    message: 'Image deleted successfully',
+                };
+            } catch (error) {
+                console.error("Error deleting image:", error);
+                throw new GraphQLError(`Error deleting user's image: ${error.message}`);
             }
         },
 
