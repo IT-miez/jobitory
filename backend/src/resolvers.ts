@@ -217,6 +217,10 @@ const resolvers = {
 
                 const deletedImage = await prisma.image.delete({where: {user_id: userInfo.id}})
 
+                cloudinary.v2.uploader
+                    .destroy(deletedImage.cloudinary_public_id)
+                    .then(result => console.log("Cloudinary delete result:",result));
+
                 const deletedUser = await prisma.user.delete({
                     where: {
                         email: email
