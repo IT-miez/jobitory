@@ -12,6 +12,7 @@ import passport from 'passport';
 import JwtStrategyConfiguration from './utils/passportSetup.js';
 import { jwtDecode } from "jwt-decode";
 import {PrismaClient} from '@prisma/client';
+import jwt from 'jsonwebtoken';
 const prisma = new PrismaClient();
 
 dotenv.config();
@@ -45,36 +46,34 @@ app.use(
     expressMiddleware(server, {
         context: async ({ req }) => {
 
-            let token = req.headers.authorization || '';
-            console.log("Token is ", token)
-            if (Array.isArray(token)) {
-                token = token[0];
+            const token = req.headers.authorization || '';
+            console.log(token)
+            console.log(typeof(token))
+            if(!token) {
+                const splitToken = token.split(" ")
+                const decodedToken = JSON.parse(splitToken[1])
+                const validToken = jwt.verify(decodedToken, process.env.SECRET)
+
+                let user = null;
+
+                if (validToken) {
+                    user =  await prisma.user.findUnique({where: {email: decodedToken.email}})
+                }
+
+
+
+                return {
+                    user,
+                };
+            } else {
+                return null
             }
 
-            token = token || '';
-            console.log('Extracted token:', token);
-
-            let user = null;
-            let tokenUser = null;
-            if (token) {
-                tokenUser = await jwtDecode(token);
-            }
-            if (tokenUser) {
-                console.log("Tokenuser is ",tokenUser)
-                user =  await prisma.user.findUnique({where: {email: tokenUser.email}})
-            }
-
-
-            console.log('Context user:', user);
-
-            return {
-                user,
-            };
         }
     })
 
 );
 
 httpServer.listen({port: 4000});
-
+// eslint-disable-next-line no-console
 console.log('🚀 Server ready at http://localhost:4000/graphql');

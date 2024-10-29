@@ -26,4 +26,9 @@ const upload = async (image) => {
     });
 };
 
-export default upload;
+const deleteCloudinaryImage = async(cloudinary_public_id) => {
+    await cloudinary.v2.uploader
+        .destroy(cloudinary_public_id)
+}
+
+export {upload, deleteCloudinaryImage};
