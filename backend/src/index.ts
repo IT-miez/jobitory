@@ -12,6 +12,9 @@ import passport from 'passport';
 import JwtStrategyConfiguration from './utils/passportSetup.js';
 import {PrismaClient} from '@prisma/client';
 import jwt from 'jsonwebtoken';
+import {makeExecutableSchema} from '@graphql-tools/schema';
+import {createApollo4QueryValidationPlugin, constraintDirectiveTypeDefs} from 'graphql-constraint-directive/apollo4.js';
+import formats from './formats.js';
 const prisma = new PrismaClient();
 
 dotenv.config();
@@ -29,10 +32,14 @@ interface AuthContext {
 const app = express();
 const httpServer = http.createServer(app);
 
-const server = new ApolloServer<AuthContext>({
-    typeDefs,
+const schema = makeExecutableSchema({
+    typeDefs: [constraintDirectiveTypeDefs, typeDefs],
     resolvers,
-    plugins: [ApolloServerPluginDrainHttpServer({httpServer})],
+});
+
+const server = new ApolloServer<AuthContext>({
+    schema,
+    plugins: [ApolloServerPluginDrainHttpServer({httpServer}), createApollo4QueryValidationPlugin({formats})],
 });
 await server.start();
 

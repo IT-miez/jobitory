@@ -1,4 +1,6 @@
-const typeDefs = /* GraphQL */ `
+import gql from 'graphql-tag';
+
+const typeDefs = /* GraphQL */ gql`
     #graphql
     # Comments in GraphQL strings (such as this one) start with the hash (#) symbol.
 
@@ -51,6 +53,18 @@ const typeDefs = /* GraphQL */ `
         profileData(email: String): User
         experiencesData(email: String): [ExperienceData!]!
         educationsData(email: String): [EducationOutput!]!
+    }
+
+    input MakeUserInput {
+        email: String!
+        first_name: String!
+        last_name: String!
+        phone_number: String
+        address: String
+        post_code: String
+        municipality: String
+        password: String!
+        image: Upload
     }
 
     input UpdateUserInput {
@@ -110,17 +124,20 @@ const typeDefs = /* GraphQL */ `
 
     type Mutation {
         makeUser(
-            email: String!
-            first_name: String!
-            last_name: String!
-            phone_number: String
-            address: String
-            post_code: String
-            municipality: String
-            password: String!
+            email: String! @constraint(format: "email")
+            first_name: String! @constraint(minLength: 1)
+            last_name: String! @constraint(minLength: 1)
+            phone_number: String @constraint(format: "phone-number")
+            address: String @constraint(format: "address")
+            post_code: String @constraint(format: "post_code")
+            municipality: String @constraint(format: "municipality")
+            password: String! @constraint(minLength: 5)
             image: Upload
         ): User
-        loginUser(email: String!, password: String!): ValidLogin
+        loginUser(
+            email: String! @constraint(minLength: 1, format: "email")
+            password: String! @constraint(minLength: 1)
+        ): ValidLogin
         deleteUser(email: String!): DeleteResult
         updateUser(input: UpdateUserInput!): UpdateUserResponse
         createExperience(input: ExperienceInput): ExperienceOutput

@@ -119,6 +119,11 @@ const resolvers = {
     Mutation: {
         makeUser: async (root, args) => {
             const user = {...args};
+
+            let uniqueUser = await prisma.user.findUnique({where: {email: user.email}});
+            if (uniqueUser) {
+                throw new GraphQLError(`Email is already in use`);
+            }
             let imageURL = null;
 
             const hashedPassword = await bcrypt.hash(user.password, 10);
