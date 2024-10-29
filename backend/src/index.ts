@@ -10,7 +10,6 @@ import resolvers from './resolvers.js';
 import typeDefs from './typedefs.js';
 import passport from 'passport';
 import JwtStrategyConfiguration from './utils/passportSetup.js';
-import { jwtDecode } from "jwt-decode";
 import {PrismaClient} from '@prisma/client';
 import jwt from 'jsonwebtoken';
 const prisma = new PrismaClient();
