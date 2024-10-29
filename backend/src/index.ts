@@ -26,7 +26,6 @@ interface AuthContext {
     };
 }
 
-
 const app = express();
 const httpServer = http.createServer(app);
 
@@ -43,32 +42,27 @@ app.use(
     graphqlUploadExpress({maxFileSize: 4194304, maxFiles: 1}),
     express.json(),
     expressMiddleware(server, {
-        context: async ({ req }) => {
-
+        context: async ({req}) => {
             const token = req.headers.authorization || '';
-            if(token) {
-                const splitToken = token.split(" ")
-                const decodedToken = JSON.parse(splitToken[1])
-                const validToken = jwt.verify(decodedToken, process.env.SECRET)
+            if (token) {
+                const splitToken = token.split(' ');
+                const decodedToken = JSON.parse(splitToken[1]);
+                const validToken = jwt.verify(decodedToken, process.env.SECRET);
 
                 let user = null;
 
                 if (validToken) {
-                    user =  await prisma.user.findUnique({where: {email: decodedToken.email}})
+                    user = await prisma.user.findUnique({where: {email: decodedToken.email}});
                 }
-
-
 
                 return {
                     user,
                 };
             } else {
-                return null
+                return null;
             }
-
-        }
+        },
     })
-
 );
 
 httpServer.listen({port: 4000});

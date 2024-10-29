@@ -13,7 +13,7 @@ const resolvers = {
     Query: {
         accountData: (givenId) => prisma.user.findUnique({where: {id: givenId}}),
         profileData: async (root, args) => {
-            const { email } = args;
+            const {email} = args;
 
             if (!email) {
                 throw new GraphQLError('Email argument is required');
@@ -33,8 +33,8 @@ const resolvers = {
                     image: {
                         select: {
                             cloudinary_url: true,
-                        }
-                    }
+                        },
+                    },
                 },
             });
 
@@ -66,21 +66,19 @@ const resolvers = {
                     return [];
                 }
 
-                const experiencesWithoutIds = userData.experiences.map(exp => ({
+                const experiencesWithoutIds = userData.experiences.map((exp) => ({
                     company_name: exp.company_name,
                     position: exp.position,
                     city: exp.city,
-                    from: exp.from.toISOString(),  // Convert Date to ISO string
-                    to: exp.to ? exp.to.toISOString() : null,  // Convert Date to ISO string, handle null
+                    from: exp.from.toISOString(), // Convert Date to ISO string
+                    to: exp.to ? exp.to.toISOString() : null, // Convert Date to ISO string, handle null
                     additional_information: exp.additional_information,
                 }));
                 return experiencesWithoutIds;
-
             } catch (error) {
-                console.error("Error fetching experiences:", error);
+                console.error('Error fetching experiences:', error);
                 throw new GraphQLError(`Error fetching experiences: ${error.message}`);
             }
-
         },
         educationsData: async (root, args, context) => {
             if (!context.user || !args.email) {
@@ -101,22 +99,20 @@ const resolvers = {
                     return [];
                 }
 
-                const educationsWithoutIds = userData.educations.map(edu => ({
+                const educationsWithoutIds = userData.educations.map((edu) => ({
                     school_name: edu.school_name,
                     degree: edu.degree,
                     subject: edu.subject,
                     city: edu.city,
-                    from: edu.from.toISOString(),  // Convert Date to ISO string
-                    to: edu.to ? edu.to.toISOString() : null,  // Convert Date to ISO string, handle null
+                    from: edu.from.toISOString(), // Convert Date to ISO string
+                    to: edu.to ? edu.to.toISOString() : null, // Convert Date to ISO string, handle null
                     additional_information: edu.additional_information,
                 }));
                 return educationsWithoutIds;
-
             } catch (error) {
-                console.error("Error fetching experiences:", error);
+                console.error('Error fetching experiences:', error);
                 throw new GraphQLError(`Error fetching experiences: ${error.message}`);
             }
-
         },
     },
 
@@ -124,7 +120,6 @@ const resolvers = {
         makeUser: async (root, args) => {
             const user = {...args};
             let imageURL = null;
-
 
             //localStorage.clear();
 
@@ -134,7 +129,7 @@ const resolvers = {
                 try {
                     imageURL = await upload(user.image);
                 } catch (error) {
-                    console.error(error)
+                    console.error(error);
                     throw new GraphQLError('Error on image upload');
                 }
             }
@@ -152,7 +147,7 @@ const resolvers = {
                     image: {
                         create: {
                             cloudinary_url: imageURL.url,
-                            cloudinary_public_id: imageURL.public_id
+                            cloudinary_public_id: imageURL.public_id,
                         },
                     },
                 },
@@ -196,34 +191,31 @@ const resolvers = {
         },
         deleteUser: async (root, {email}, context) => {
             if (!context.user || !context.user.email) {
-                console.error("User is undefined or email is missing");
+                console.error('User is undefined or email is missing');
                 throw new GraphQLError('User not authenticated');
             }
 
             if (context.user.email !== email) {
-                console.error("not the same email")
+                console.error('not the same email');
                 throw new GraphQLError('You are not authorized to delete this user');
             }
-
 
             try {
                 const userInfo = await prisma.user.findUnique({where: {email: context.user.email}});
 
-                const deletedImage = await prisma.image.delete({where: {user_id: userInfo.id}})
+                const deletedImage = await prisma.image.delete({where: {user_id: userInfo.id}});
 
-
-                await deleteCloudinaryImage(deletedImage.cloudinary_public_id)
+                await deleteCloudinaryImage(deletedImage.cloudinary_public_id);
 
                 const deletedUser = await prisma.user.delete({
                     where: {
-                        email: email
-                    }
+                        email: email,
+                    },
                 });
 
                 return {
-                    message: `Deleted user with email: ${deletedUser.email}`
+                    message: `Deleted user with email: ${deletedUser.email}`,
                 };
-
             } catch (error) {
                 throw new GraphQLError(`Error deleting user: ${error.message}`);
             }
@@ -235,27 +227,17 @@ const resolvers = {
                 throw new GraphQLError('User not authenticated');
             }
 
-            const {
-                email,
-                first_name,
-                last_name,
-                phone_number,
-                address,
-                post_code,
-                municipality,
-                image,
-            } = input;
+            const {email, first_name, last_name, phone_number, address, post_code, municipality, image} = input;
 
             let imageURL;
 
-            await cloudinary.v2.uploader
-                .destroy(user.image.cloudinary_public_id)
+            await cloudinary.v2.uploader.destroy(user.image.cloudinary_public_id);
 
             if (image) {
                 try {
                     imageURL = await upload(image);
                 } catch (error) {
-                    console.error("Error uploading image:", error);
+                    console.error('Error uploading image:', error);
                     throw new GraphQLError('Error on image upload');
                 }
             }
@@ -289,12 +271,12 @@ const resolvers = {
                     user: updatedUser,
                 };
             } catch (error) {
-                console.error("Error updating user:", error);
+                console.error('Error updating user:', error);
                 throw new GraphQLError(`Error updating user: ${error.message}`);
             }
         },
         createExperience: async (root, input, context) => {
-            const userArgs = input.input
+            const userArgs = input.input;
             if (!context.user || !context.user.email) {
                 throw new GraphQLError('User not authenticated');
             }
@@ -338,12 +320,12 @@ const resolvers = {
                     experience: newExperience,
                 };
             } catch (error) {
-                console.error("Error creating experience:", error);
+                console.error('Error creating experience:', error);
                 throw new GraphQLError(`Error creating experience: ${error.message}`);
             }
         },
         deleteExperience: async (root, args, context) => {
-            const experience_id = args.experience_id
+            const experience_id = args.experience_id;
             if (!context.user || !context.user.email) {
                 throw new GraphQLError('User not authenticated');
             }
@@ -372,12 +354,12 @@ const resolvers = {
                     message: `Deleted experience with id: ${deletedExperience.id}`,
                 };
             } catch (error) {
-                console.error("Error deleting experience:", error);
+                console.error('Error deleting experience:', error);
                 throw new GraphQLError(`Error deleting experience: ${error.message}`);
             }
         },
         deleteEducation: async (root, args, context) => {
-            const education_id = args.education_id
+            const education_id = args.education_id;
             if (!context.user || !context.user.email) {
                 throw new GraphQLError('User not authenticated');
             }
@@ -405,12 +387,11 @@ const resolvers = {
                     message: `Deleted education with id: ${deletedExperience.id}`,
                 };
             } catch (error) {
-                console.error("Error deleting education:", error);
+                console.error('Error deleting education:', error);
                 throw new GraphQLError(`Error deleting education: ${error.message}`);
             }
         },
         deleteImage: async (root, args, context) => {
-
             if (!context.user || !context.user.email) {
                 throw new GraphQLError('User not authenticated');
             }
@@ -419,15 +400,14 @@ const resolvers = {
                 const userImage = await prisma.image.findUnique({
                     where: {
                         user_id: context.user.id,
-                    }
-                })
+                    },
+                });
 
                 if (!userImage || !userImage.cloudinary_public_id) {
                     throw new GraphQLError('No image found for the user.');
                 }
 
-
-                await deleteCloudinaryImage(userImage.cloudinary_public_id)
+                await deleteCloudinaryImage(userImage.cloudinary_public_id);
 
                 await prisma.image.delete({
                     where: {
@@ -439,12 +419,11 @@ const resolvers = {
                     message: 'Image deleted successfully',
                 };
             } catch (error) {
-                console.error("Error deleting image:", error);
+                console.error('Error deleting image:', error);
                 throw new GraphQLError(`Error deleting user's image: ${error.message}`);
             }
         },
-
-    }
+    },
 };
 
 export default resolvers;

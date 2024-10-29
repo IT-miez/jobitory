@@ -14,7 +14,7 @@ const typeDefs = /* GraphQL */ `
         municipality: String
         image_url: String
     }
-    
+
     type DeleteResult {
         message: String
     }
@@ -45,13 +45,12 @@ const typeDefs = /* GraphQL */ `
         to: String
         additional_Information: String
     }
-    
 
     type Query {
-        accountData(id: String): User,
-        profileData(email: String): User,
-        experiencesData(email: String): [ExperienceData!]!,
-        educationsData(email: String): [EducationOutput!]!,
+        accountData(id: String): User
+        profileData(email: String): User
+        experiencesData(email: String): [ExperienceData!]!
+        educationsData(email: String): [EducationOutput!]!
     }
 
     input UpdateUserInput {
@@ -73,8 +72,8 @@ const typeDefs = /* GraphQL */ `
         to: String
         additional_information: String!
     }
-    
-    type  ExperienceOutput {
+
+    type ExperienceOutput {
         company_name: String!
         position: String!
         city: String!
@@ -82,19 +81,19 @@ const typeDefs = /* GraphQL */ `
         to: String
         additional_information: String!
     }
-    
+
     input Education {
         id: Int!
         school_name: String
-        city:String
-        degree:String
+        city: String
+        degree: String
         subject: String
         from: String
         to: String
         additional_information: String
     }
-    
-    type  EducationOutput {
+
+    type EducationOutput {
         school_name: String!
         city: String!
         degree: String!
@@ -103,7 +102,7 @@ const typeDefs = /* GraphQL */ `
         to: String
         additional_information: String!
     }
-    
+
     type UpdateUserResponse {
         message: String
         user: User
@@ -121,13 +120,13 @@ const typeDefs = /* GraphQL */ `
             password: String!
             image: Upload
         ): User
-        loginUser(email: String!, password: String!): ValidLogin,
-        deleteUser(email: String!):DeleteResult,
-        updateUser(input: UpdateUserInput!): UpdateUserResponse,
-        createExperience(input: ExperienceInput): ExperienceOutput,
-        deleteExperience(experience_id: Int!):DeleteResult,
-        createEducation(input: Education!): EducationOutput,
-        deleteEducation(education_id: Int!):DeleteResult,
+        loginUser(email: String!, password: String!): ValidLogin
+        deleteUser(email: String!): DeleteResult
+        updateUser(input: UpdateUserInput!): UpdateUserResponse
+        createExperience(input: ExperienceInput): ExperienceOutput
+        deleteExperience(experience_id: Int!): DeleteResult
+        createEducation(input: Education!): EducationOutput
+        deleteEducation(education_id: Int!): DeleteResult
         deleteImage: DeleteResult
     }
 `;
