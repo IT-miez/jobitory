@@ -121,8 +121,6 @@ const resolvers = {
             const user = {...args};
             let imageURL = null;
 
-            //localStorage.clear();
-
             const hashedPassword = await bcrypt.hash(user.password, 10);
 
             if (user.image) {
