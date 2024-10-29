@@ -10,8 +10,8 @@ import resolvers from './resolvers.js';
 import typeDefs from './typedefs.js';
 import passport from 'passport';
 import JwtStrategyConfiguration from './utils/passportSetup.js';
-import { jwtDecode } from "jwt-decode";
 import {PrismaClient} from '@prisma/client';
+import jwt from 'jsonwebtoken';
 const prisma = new PrismaClient();
 
 dotenv.config();
@@ -25,7 +25,6 @@ interface AuthContext {
         last_name: string;
     };
 }
-
 
 const app = express();
 const httpServer = http.createServer(app);
@@ -43,32 +42,27 @@ app.use(
     graphqlUploadExpress({maxFileSize: 4194304, maxFiles: 1}),
     express.json(),
     expressMiddleware(server, {
-        context: async ({ req }) => {
-
-            let token = req.headers.authorization || '';
-            if (Array.isArray(token)) {
-                token = token[0];
-            }
-
-            token = token || '';
-
-            let user = null;
-            let tokenUser = null;
+        context: async ({req}) => {
+            const token = req.headers.authorization || '';
             if (token) {
-                tokenUser = await jwtDecode(token);
+                const splitToken = token.split(' ');
+                const decodedToken = JSON.parse(splitToken[1]);
+                const validToken = jwt.verify(decodedToken, process.env.SECRET);
+
+                let user = null;
+
+                if (validToken) {
+                    user = await prisma.user.findUnique({where: {email: decodedToken.email}});
+                }
+
+                return {
+                    user,
+                };
+            } else {
+                return null;
             }
-            if (tokenUser) {
-                user =  await prisma.user.findUnique({where: {email: tokenUser.email}})
-            }
-
-
-
-            return {
-                user,
-            };
-        }
+        },
     })
-
 );
 
 httpServer.listen({port: 4000});
