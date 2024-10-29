@@ -47,9 +47,7 @@ app.use(
         context: async ({ req }) => {
 
             const token = req.headers.authorization || '';
-            console.log(token)
-            console.log(typeof(token))
-            if(!token) {
+            if(token) {
                 const splitToken = token.split(" ")
                 const decodedToken = JSON.parse(splitToken[1])
                 const validToken = jwt.verify(decodedToken, process.env.SECRET)
