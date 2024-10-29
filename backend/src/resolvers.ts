@@ -120,7 +120,7 @@ const resolvers = {
         makeUser: async (root, args) => {
             const user = {...args};
 
-            let uniqueUser = await prisma.user.findUnique({where: {email: user.email}});
+            const uniqueUser = await prisma.user.findUnique({where: {email: user.email}});
             if (uniqueUser) {
                 throw new GraphQLError(`Email is already in use`);
             }
