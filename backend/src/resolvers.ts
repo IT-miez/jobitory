@@ -1,17 +1,18 @@
-import {PrismaClient} from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import GraphQLUpload from 'graphql-upload/GraphQLUpload.mjs';
 import {upload, deleteCloudinaryImage} from './utils/cloudinary.js';
 import {GraphQLError} from 'graphql';
 import cloudinary from 'cloudinary';
+import {Resolvers} from './generated/graphql.js';
+import {prisma} from './index.js';
+import {validateLoginUser, validateMakeUser} from './utils/validation.js';
+import {GraphQLInvalidArgsError} from './utils/error.js';
 
-const prisma = new PrismaClient();
-
-const resolvers = {
+const resolvers: Resolvers = {
     Upload: GraphQLUpload,
     Query: {
-        accountData: (givenId) => prisma.user.findUnique({where: {id: givenId}}),
+        accountData: (givenId) => prisma.user.findUnique({where: {id: Number(givenId)}}),
         profileData: async (root, args) => {
             const {email} = args;
 
@@ -66,7 +67,7 @@ const resolvers = {
                     return [];
                 }
 
-                const experiencesWithoutIds = userData.experiences.map((exp) => ({
+                return userData.experiences.map((exp) => ({
                     company_name: exp.company_name,
                     position: exp.position,
                     city: exp.city,
@@ -74,7 +75,6 @@ const resolvers = {
                     to: exp.to ? exp.to.toISOString() : null, // Convert Date to ISO string, handle null
                     additional_information: exp.additional_information,
                 }));
-                return experiencesWithoutIds;
             } catch (error) {
                 console.error('Error fetching experiences:', error);
                 throw new GraphQLError(`Error fetching experiences: ${error.message}`);
@@ -99,7 +99,7 @@ const resolvers = {
                     return [];
                 }
 
-                const educationsWithoutIds = userData.educations.map((edu) => ({
+                return userData.educations.map((edu) => ({
                     school_name: edu.school_name,
                     degree: edu.degree,
                     subject: edu.subject,
@@ -108,7 +108,6 @@ const resolvers = {
                     to: edu.to ? edu.to.toISOString() : null, // Convert Date to ISO string, handle null
                     additional_information: edu.additional_information,
                 }));
-                return educationsWithoutIds;
             } catch (error) {
                 console.error('Error fetching experiences:', error);
                 throw new GraphQLError(`Error fetching experiences: ${error.message}`);
@@ -117,20 +116,18 @@ const resolvers = {
     },
 
     Mutation: {
-        makeUser: async (root, args) => {
-            const user = {...args};
-            let imageURL = null;
+        makeUser: async (root, {user}) => {
+            await validateMakeUser(user);
+
+            const existingUser = await prisma.user.findUnique({where: {email: user.email}});
+
+            if (existingUser) {
+                throw new GraphQLInvalidArgsError('Email already in use', 'email');
+            }
+
+            const uploadResult = await upload(user.image);
 
             const hashedPassword = await bcrypt.hash(user.password, 10);
-
-            if (user.image) {
-                try {
-                    imageURL = await upload(user.image);
-                } catch (error) {
-                    console.error(error);
-                    throw new GraphQLError('Error on image upload');
-                }
-            }
 
             await prisma.user.create({
                 data: {
@@ -142,32 +139,36 @@ const resolvers = {
                     post_code: user.post_code,
                     municipality: user.municipality,
                     password: hashedPassword,
-                    image: {
-                        create: {
-                            cloudinary_url: imageURL.url,
-                            cloudinary_public_id: imageURL.public_id,
+                    ...(uploadResult && {
+                        image: {
+                            create: {
+                                cloudinary_url: uploadResult.url,
+                                cloudinary_public_id: uploadResult.public_id,
+                            },
                         },
-                    },
+                    }),
                 },
             });
 
             return user;
         },
 
-        loginUser: async (root, {email, password}) => {
+        loginUser: async (root, {credentials}) => {
+            await validateLoginUser(credentials);
+
             const user = await prisma.user.findUnique({
                 where: {
-                    email: email,
+                    email: credentials.email,
                 },
             });
 
             if (!user) {
-                throw new GraphQLError('Invalid credentials');
+                throw new GraphQLInvalidArgsError('Invalid credentials', 'password');
             }
 
-            const isMatch = await bcrypt.compare(password, user.password);
+            const isMatch = await bcrypt.compare(credentials.password, user.password);
             if (!isMatch) {
-                throw new GraphQLError('Invalid credentials');
+                throw new GraphQLInvalidArgsError('Invalid credentials', 'password');
             }
 
             const jwtPayload = {
@@ -227,18 +228,9 @@ const resolvers = {
 
             const {email, first_name, last_name, phone_number, address, post_code, municipality, image} = input;
 
-            let imageURL;
-
             await cloudinary.v2.uploader.destroy(user.image.cloudinary_public_id);
 
-            if (image) {
-                try {
-                    imageURL = await upload(image);
-                } catch (error) {
-                    console.error('Error uploading image:', error);
-                    throw new GraphQLError('Error on image upload');
-                }
-            }
+            const uploadResult = await upload(user.image);
 
             try {
                 const updateData = {
@@ -249,17 +241,23 @@ const resolvers = {
                     address,
                     post_code,
                     municipality,
-                    ...(imageURL && {
+                    ...(uploadResult && {
                         image: {
                             upsert: {
-                                create: {cloudinary_url: imageURL.url, cloudinary_public_id: imageURL.public_id},
-                                update: {cloudinary_url: imageURL.url, cloudinary_public_id: imageURL.public_id},
+                                create: {
+                                    cloudinary_url: uploadResult.url,
+                                    cloudinary_public_id: uploadResult.public_id,
+                                },
+                                update: {
+                                    cloudinary_url: uploadResult.url,
+                                    cloudinary_public_id: uploadResult.public_id,
+                                },
                             },
                         },
                     }),
                 };
 
-                const updatedUser = await context.prisma.user.update({
+                const updatedUser = await prisma.user.update({
                     where: {email: user.email},
                     data: updateData,
                 });
@@ -273,8 +271,8 @@ const resolvers = {
                 throw new GraphQLError(`Error updating user: ${error.message}`);
             }
         },
-        createExperience: async (root, input, context) => {
-            const userArgs = input.input;
+        createExperience: async (root, args, context) => {
+            const userArgs = args.input;
             if (!context.user || !context.user.email) {
                 throw new GraphQLError('User not authenticated');
             }
@@ -314,8 +312,9 @@ const resolvers = {
                     },
                 });
                 return {
-                    message: 'Experience created successfully',
-                    experience: newExperience,
+                    ...newExperience,
+                    from: newExperience.from ? newExperience.from.toISOString() : null,
+                    to: newExperience.to ? newExperience.to.toISOString() : null,
                 };
             } catch (error) {
                 console.error('Error creating experience:', error);

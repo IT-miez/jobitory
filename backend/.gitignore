@@ -17,3 +17,4 @@ experimental/**/*.db
 .nuxt
 dev.db
 .env
+generated

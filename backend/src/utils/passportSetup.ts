@@ -1,6 +1,5 @@
-import {PrismaClient} from '@prisma/client';
-const prisma = new PrismaClient();
 import {Strategy as JwtStrategy, ExtractJwt} from 'passport-jwt';
+import {prisma} from '../index.js';
 
 const JwtStrategyConfiguration = new JwtStrategy(
     {jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(), secretOrKey: process.env.SECRET},

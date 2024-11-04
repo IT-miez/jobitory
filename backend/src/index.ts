@@ -10,28 +10,28 @@ import resolvers from './resolvers.js';
 import typeDefs from './typedefs.js';
 import passport from 'passport';
 import JwtStrategyConfiguration from './utils/passportSetup.js';
-import {PrismaClient} from '@prisma/client';
-import jwt from 'jsonwebtoken';
-const prisma = new PrismaClient();
+import {makeExecutableSchema} from '@graphql-tools/schema';
+import {context} from './utils/context.js';
+import {PrismaClient, Prisma} from '@prisma/client';
+export const prisma = new PrismaClient();
 
 dotenv.config();
 passport.use(JwtStrategyConfiguration);
 
-interface AuthContext {
-    user?: {
-        token: string;
-        email: string;
-        first_name: string;
-        last_name: string;
-    };
+export interface AuthContext {
+    user?: Prisma.UserGetPayload<{include: {image: true}}>;
 }
 
 const app = express();
 const httpServer = http.createServer(app);
 
-const server = new ApolloServer<AuthContext>({
+const schema = makeExecutableSchema({
     typeDefs,
     resolvers,
+});
+
+const server = new ApolloServer<AuthContext>({
+    schema,
     plugins: [ApolloServerPluginDrainHttpServer({httpServer})],
 });
 await server.start();
@@ -42,26 +42,7 @@ app.use(
     graphqlUploadExpress({maxFileSize: 4194304, maxFiles: 1}),
     express.json(),
     expressMiddleware(server, {
-        context: async ({req}) => {
-            const token = req.headers.authorization || '';
-            if (token) {
-                const splitToken = token.split(' ');
-                const decodedToken = JSON.parse(splitToken[1]);
-                const validToken = jwt.verify(decodedToken, process.env.SECRET);
-
-                let user = null;
-
-                if (validToken) {
-                    user = await prisma.user.findUnique({where: {email: decodedToken.email}});
-                }
-
-                return {
-                    user,
-                };
-            } else {
-                return null;
-            }
-        },
+        context,
     })
 );
 
