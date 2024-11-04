@@ -43,8 +43,7 @@
   "source": "src/index.ts",
   "scripts": {
     "compile": "tsc",
-    "start": "npm run compile && nodemon ./dist/index.js",
-    "dev": "concurrently --names \"codegen,typescript,nodemon\" -c \"bgMagenta.black,bgBlue.black,bgGreen.black\" \"graphql-codegen --watch --config codegen.ts\" \"tsc -w\" \"nodemon ./dist/index.js\"",
+    "start": "concurrently --names \"codegen,typescript,nodemon\" -c \"bgMagenta.black,bgBlue.black,bgGreen.black\" \"graphql-codegen --watch --config codegen.ts\" \"tsc -w\" \"nodemon ./dist/index.js\"",
     "codegen": "graphql-codegen --config codegen.ts"
   }
 }
