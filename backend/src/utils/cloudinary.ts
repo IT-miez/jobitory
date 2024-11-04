@@ -28,6 +28,7 @@ const upload = async (image): Promise<UploadApiResponse | undefined> => {
             stream.pipe(sharpImage).pipe(uploader);
         });
     } catch (error) {
+        console.error(error);
         throw new GraphQLInternalServerError('Error on image upload', 'image');
     }
 };

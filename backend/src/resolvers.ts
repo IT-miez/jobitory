@@ -230,7 +230,7 @@ const resolvers: Resolvers = {
 
             await cloudinary.v2.uploader.destroy(user.image.cloudinary_public_id);
 
-            const uploadResult = await upload(user.image);
+            const uploadResult = await upload(image);
 
             try {
                 const updateData = {

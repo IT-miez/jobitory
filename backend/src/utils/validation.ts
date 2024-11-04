@@ -5,7 +5,6 @@ import {GraphQLZodError} from './error.js';
 import {z} from 'zod';
 
 function parseIssues(issues: ZodIssue[]): JobitoryError[] {
-    console.log(issues);
     return issues.map((issue) => ({
         message: issue.message,
         field: issue.path[0],
@@ -13,7 +12,7 @@ function parseIssues(issues: ZodIssue[]): JobitoryError[] {
 }
 
 type Properties<T> = Required<{
-    [K in keyof T]: z.ZodType<T[K], any, T[K]>;
+    [K in keyof T]: z.ZodType<T[K], any, T[K]>; // eslint-disable-line @typescript-eslint/no-explicit-any
 }>;
 
 export async function validateResolverArgs<T>(schema: () => z.ZodObject<Properties<T>>, args: T) {
