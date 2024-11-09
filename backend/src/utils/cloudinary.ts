@@ -1,6 +1,7 @@
 import sharp from 'sharp';
-import cloudinary from 'cloudinary';
+import cloudinary, {UploadApiResponse} from 'cloudinary';
 import dotenv from 'dotenv';
+import {GraphQLInternalServerError} from './error.js';
 
 dotenv.config();
 
@@ -11,19 +12,25 @@ cloudinary.v2.config({
     api_secret: process.env.CLOUDINARY_SECRET,
 });
 
-const upload = async (image) => {
-    const {createReadStream} = await image;
-    const stream = createReadStream();
-    const sharpImage = sharp().webp({quality: 75});
+const upload = async (image): Promise<UploadApiResponse | undefined> => {
+    if (!image) return null;
+    try {
+        const {createReadStream} = await image;
+        const stream = createReadStream();
+        const sharpImage = sharp().webp({quality: 75});
 
-    return new Promise((resolve, reject) => {
-        const uploader = cloudinary.v2.uploader.upload_stream({folder: 'cloudinary_folder'}, (error, result) => {
-            if (error) return reject(error);
-            resolve(result);
+        return new Promise((resolve, reject) => {
+            const uploader = cloudinary.v2.uploader.upload_stream({folder: 'cloudinary_folder'}, (error, result) => {
+                if (error) return reject(error);
+                resolve(result);
+            });
+
+            stream.pipe(sharpImage).pipe(uploader);
         });
-
-        stream.pipe(sharpImage).pipe(uploader);
-    });
+    } catch (error) {
+        console.error(error);
+        throw new GraphQLInternalServerError('Error on image upload', 'image');
+    }
 };
 
 const deleteCloudinaryImage = async (cloudinary_public_id) => {

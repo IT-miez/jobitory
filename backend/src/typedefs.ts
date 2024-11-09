@@ -1,19 +1,17 @@
-const typeDefs = /* GraphQL */ `
+import gql from 'graphql-tag';
+
+const typeDefs = /* GraphQL */ gql`
     #graphql
     # Comments in GraphQL strings (such as this one) start with the hash (#) symbol.
 
-    scalar Upload
+    directive @constraint(
+        minLength: Int
+        maxLength: Int
+        format: String
+        message: String
+    ) on INPUT_FIELD_DEFINITION | ARGUMENT_DEFINITION
 
-    type User {
-        email: String!
-        first_name: String!
-        last_name: String!
-        phone_number: String
-        address: String
-        post_code: String
-        municipality: String
-        image_url: String
-    }
+    scalar Upload
 
     type DeleteResult {
         message: String
@@ -108,19 +106,37 @@ const typeDefs = /* GraphQL */ `
         user: User
     }
 
+    type User {
+        email: String!
+        first_name: String!
+        last_name: String!
+        phone_number: String
+        address: String
+        post_code: String
+        municipality: String
+        image_url: String
+    }
+
+    input NewUserInput {
+        email: String! @constraint(minLength: 3, maxLength: 64, format: "email")
+        first_name: String! @constraint(minLength: 2, maxLength: 64)
+        last_name: String! @constraint(minLength: 2, maxLength: 64)
+        phone_number: String @constraint(minLength: 3, maxLength: 64)
+        address: String @constraint(minLength: 3, maxLength: 64)
+        post_code: String @constraint(minLength: 3, maxLength: 64)
+        municipality: String @constraint(minLength: 3, maxLength: 64)
+        password: String! @constraint(minLength: 3, maxLength: 64)
+        image: Upload
+    }
+
+    input LoginUserInput {
+        email: String! # @constraint(minLength: 1, format: "email")
+        password: String! # @constraint(minLength: 1)
+    }
+
     type Mutation {
-        makeUser(
-            email: String!
-            first_name: String!
-            last_name: String!
-            phone_number: String
-            address: String
-            post_code: String
-            municipality: String
-            password: String!
-            image: Upload
-        ): User
-        loginUser(email: String!, password: String!): ValidLogin
+        makeUser(user: NewUserInput): User
+        loginUser(credentials: LoginUserInput): ValidLogin
         deleteUser(email: String!): DeleteResult
         updateUser(input: UpdateUserInput!): UpdateUserResponse
         createExperience(input: ExperienceInput): ExperienceOutput
