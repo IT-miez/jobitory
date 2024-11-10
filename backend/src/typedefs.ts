@@ -130,8 +130,8 @@ const typeDefs = /* GraphQL */ gql`
     }
 
     input LoginUserInput {
-        email: String! # @constraint(minLength: 1, format: "email")
-        password: String! # @constraint(minLength: 1)
+        email: String! @constraint(minLength: 3, format: "email")
+        password: String! @constraint(minLength: 3)
     }
 
     type Mutation {

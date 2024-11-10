@@ -10,12 +10,14 @@ export const MAKE_USER = gql(/* GraphQL */ `
         $image: Upload
     ) {
         makeUser(
-            email: $email
-            first_name: $first_name
-            last_name: $last_name
-            phone_number: $phone_number
-            password: $password
-            image: $image
+            user: {
+                email: $email
+                first_name: $first_name
+                last_name: $last_name
+                phone_number: $phone_number
+                password: $password
+                image: $image
+            }
         ) {
             email
         }
@@ -24,7 +26,7 @@ export const MAKE_USER = gql(/* GraphQL */ `
 
 export const LOGIN_USER = gql(/* GraphQL */ `
     mutation loginUser($email: String!, $password: String!) {
-        loginUser(email: $email, password: $password) {
+        loginUser(credentials: {email: $email, password: $password}) {
             token
             message
             email

@@ -1,13 +1,21 @@
-import {Button, Heading, TextField} from '@topihenrik/funktia';
-import {useMutation} from '@apollo/client';
-import {LOGIN_USER} from '../graphql/mutations.ts';
-import {SyntheticEvent, useEffect, useState} from 'react';
+import {Button, Form, Heading, TextField} from '@topihenrik/funktia';
+import {LOGIN_USER} from '../../graphql/mutations.ts';
+import {SyntheticEvent, useMemo, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {storageKeys} from '../../constants/storagekeys.ts';
+import {useJobitoryMutation} from '../../hooks/usejobitorymutation.tsx';
 
 export function Login() {
-    const [login, {data}] = useMutation(LOGIN_USER);
     const navigate = useNavigate();
+    const [login, {error}] = useJobitoryMutation(LOGIN_USER, {
+        onCompleted: (data) => {
+            if (data?.loginUser?.token) {
+                localStorage.setItem(storageKeys.auth_token, data.loginUser.token);
+
+                navigate('/dashboard');
+            }
+        },
+    });
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
@@ -21,13 +29,10 @@ export function Login() {
         });
     }
 
-    useEffect(() => {
-        if (data?.loginUser?.token) {
-            localStorage.setItem(storageKeys.auth_token, data.loginUser.token);
-
-            navigate('/dashboard');
-        }
-    }, [data, navigate]);
+    const validationErrors = useMemo(
+        () => (error?.validationErrors ? {password: 'Invalid credentials', email: ' '} : undefined),
+        [error?.validationErrors]
+    );
 
     return (
         <div className="flex flex-col gap-4 w-[400px]">
@@ -40,7 +45,7 @@ export function Login() {
                 <div className="flex flex-col gap-4">
                     <Heading level={5}>Please login to continue</Heading>
                 </div>
-                <form onSubmit={onSubmit} className="flex flex-col gap-2">
+                <Form validationErrors={validationErrors} onSubmit={onSubmit} className="flex flex-col gap-2">
                     <TextField
                         onChange={setEmail}
                         label="Email"
@@ -60,7 +65,7 @@ export function Login() {
                     <Button type="submit" className="mt-4" color="primary">
                         Login
                     </Button>
-                </form>
+                </Form>
             </div>
         </div>
     );
