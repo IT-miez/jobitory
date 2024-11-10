@@ -11,6 +11,7 @@ import {AppLayout} from './components/common/applayout.tsx';
 import {AuthGuard} from './components/auth/authguard.tsx';
 import {CVEditor} from './components/editor/cveditor.tsx';
 import {JobApplications} from './components/jobs/jobapplications.tsx';
+import {GlobalToastRegion} from '@topihenrik/funktia';
 
 const client = new ApolloClient({
     cache: cache,
@@ -35,6 +36,7 @@ function Router() {
                         </Route>
                     </Route>
                 </Routes>
+                <GlobalToastRegion />
             </BrowserRouter>
         </ApolloProvider>
     );

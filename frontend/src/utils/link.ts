@@ -1,4 +1,4 @@
-import {ApolloLink, concat} from '@apollo/client';
+import {from, ApolloLink} from '@apollo/client';
 import createUploadLink from 'apollo-upload-client/createUploadLink.mjs';
 import {storageKeys} from '../constants/storagekeys.ts';
 
@@ -20,4 +20,4 @@ const authMiddleware = new ApolloLink((operation, forward) => {
     return forward(operation);
 });
 
-export default concat(authMiddleware, uploadLink);
+export default from([authMiddleware, uploadLink]);

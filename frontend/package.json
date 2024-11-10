@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@apollo/client": "^3.11.8",
-    "@topihenrik/funktia": "0.2.3",
+    "@topihenrik/funktia": "1.1.2",
     "apollo-upload-client": "18.0.1",
     "graphql": "16.9.0",
     "react": "18.3.1",
