@@ -18,6 +18,7 @@ const typeDefs = /* GraphQL */ gql`
     }
 
     type ValidLogin {
+        id: Int!
         token: String!
         message: String!
         email: String!
@@ -44,14 +45,8 @@ const typeDefs = /* GraphQL */ gql`
         additional_Information: String
     }
 
-    type Query {
-        accountData(id: String): User
-        profileData(email: String): User
-        experiencesData(email: String): [ExperienceData!]!
-        educationsData(email: String): [EducationOutput!]!
-    }
-
     input UpdateUserInput {
+        id: Int!
         email: String
         first_name: String
         last_name: String
@@ -107,6 +102,7 @@ const typeDefs = /* GraphQL */ gql`
     }
 
     type User {
+        id: Int!
         email: String!
         first_name: String!
         last_name: String!
@@ -134,11 +130,18 @@ const typeDefs = /* GraphQL */ gql`
         password: String! @constraint(minLength: 3)
     }
 
+    type Query {
+        accountData(id: Int): User
+        profileData(id: Int): User
+        experiencesData(email: String): [ExperienceData!]!
+        educationsData(email: String): [EducationOutput!]!
+    }
+
     type Mutation {
         makeUser(user: NewUserInput): User
         loginUser(credentials: LoginUserInput): ValidLogin
         deleteUser(email: String!): DeleteResult
-        updateUser(input: UpdateUserInput!): UpdateUserResponse
+        updateUser(user: UpdateUserInput!): UpdateUserResponse
         createExperience(input: ExperienceInput): ExperienceOutput
         deleteExperience(experience_id: Int!): DeleteResult
         createEducation(input: Education!): EducationOutput

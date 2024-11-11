@@ -14,16 +14,17 @@ const resolvers: Resolvers = {
     Query: {
         accountData: (givenId) => prisma.user.findUnique({where: {id: Number(givenId)}}),
         profileData: async (root, args) => {
-            const {email} = args;
+            const {id} = args;
 
-            if (!email) {
+            if (!id) {
                 throw new GraphQLError('Email argument is required');
             }
             const userProfile = await prisma.user.findUnique({
                 where: {
-                    email: email,
+                    id: id,
                 },
                 select: {
+                    id: true,
                     email: true,
                     first_name: true,
                     last_name: true,
@@ -40,7 +41,7 @@ const resolvers: Resolvers = {
             });
 
             if (!userProfile) {
-                throw new GraphQLError(`User with email ${email} not found`);
+                throw new GraphQLError(`User with id ${id} not found`);
             }
 
             return {
@@ -129,7 +130,7 @@ const resolvers: Resolvers = {
 
             const hashedPassword = await bcrypt.hash(user.password, 10);
 
-            await prisma.user.create({
+            return prisma.user.create({
                 data: {
                     first_name: user.first_name,
                     last_name: user.last_name,
@@ -149,8 +150,6 @@ const resolvers: Resolvers = {
                     }),
                 },
             });
-
-            return user;
         },
 
         loginUser: async (root, {credentials}) => {
@@ -183,9 +182,7 @@ const resolvers: Resolvers = {
             return {
                 token,
                 message: 'ok',
-                email: user.email,
-                first_name: user.first_name,
-                last_name: user.last_name,
+                ...user,
             };
         },
         deleteUser: async (root, {email}, context) => {
@@ -219,16 +216,16 @@ const resolvers: Resolvers = {
                 throw new GraphQLError(`Error deleting user: ${error.message}`);
             }
         },
-        updateUser: async (root, {input}, context) => {
-            const {user} = context;
-
-            if (!user || !user.email) {
+        updateUser: async (root, {user}, context) => {
+            if (!context.user || !context.user.email) {
                 throw new GraphQLError('User not authenticated');
             }
 
-            const {email, first_name, last_name, phone_number, address, post_code, municipality, image} = input;
+            const {email, first_name, last_name, phone_number, address, post_code, municipality, image} = user;
 
-            await cloudinary.v2.uploader.destroy(user.image.cloudinary_public_id);
+            if (image) {
+                await cloudinary.v2.uploader.destroy(context.user.image.cloudinary_public_id);
+            }
 
             const uploadResult = await upload(image);
 
@@ -258,13 +255,19 @@ const resolvers: Resolvers = {
                 };
 
                 const updatedUser = await prisma.user.update({
-                    where: {email: user.email},
+                    where: {id: user.id},
                     data: updateData,
+                    include: {
+                        image: true,
+                    },
                 });
 
                 return {
                     message: 'User updated successfully',
-                    user: updatedUser,
+                    user: {
+                        ...updatedUser,
+                        image_url: updatedUser.image ? updatedUser.image.cloudinary_url : null,
+                    },
                 };
             } catch (error) {
                 console.error('Error updating user:', error);
