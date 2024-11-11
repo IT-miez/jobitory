@@ -16,7 +16,6 @@ const resolvers: Resolvers = {
         profileData: async (root, args) => {
             const {id} = args;
 
-
             if (!id) {
                 throw new GraphQLError('Email argument is required');
             }
@@ -25,6 +24,7 @@ const resolvers: Resolvers = {
                     id: id,
                 },
                 select: {
+                    id: true,
                     email: true,
                     first_name: true,
                     last_name: true,
@@ -150,7 +150,6 @@ const resolvers: Resolvers = {
                     }),
                 },
             });
-
         },
 
         loginUser: async (root, {credentials}) => {
@@ -183,7 +182,7 @@ const resolvers: Resolvers = {
             return {
                 token,
                 message: 'ok',
-               ...user,
+                ...user,
             };
         },
         deleteUser: async (root, {email}, context) => {
@@ -218,17 +217,15 @@ const resolvers: Resolvers = {
             }
         },
         updateUser: async (root, {user}, context) => {
-
             if (!context.user || !context.user.email) {
                 throw new GraphQLError('User not authenticated');
             }
 
             const {email, first_name, last_name, phone_number, address, post_code, municipality, image} = user;
 
-            if(image) {
+            if (image) {
                 await cloudinary.v2.uploader.destroy(context.user.image.cloudinary_public_id);
             }
-
 
             const uploadResult = await upload(image);
 
@@ -258,18 +255,18 @@ const resolvers: Resolvers = {
                 };
 
                 const updatedUser = await prisma.user.update({
-                    where: {email: user.email},
+                    where: {id: user.id},
                     data: updateData,
                     include: {
-                        image: true
-                    }
+                        image: true,
+                    },
                 });
 
                 return {
                     message: 'User updated successfully',
                     user: {
                         ...updatedUser,
-                        image_url: updatedUser.image ? updatedUser.image.cloudinary_url: null
+                        image_url: updatedUser.image ? updatedUser.image.cloudinary_url : null,
                     },
                 };
             } catch (error) {

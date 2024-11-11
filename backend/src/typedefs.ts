@@ -44,9 +44,9 @@ const typeDefs = /* GraphQL */ gql`
         to: String
         additional_Information: String
     }
-    
 
     input UpdateUserInput {
+        id: Int!
         email: String
         first_name: String
         last_name: String
@@ -148,8 +148,6 @@ const typeDefs = /* GraphQL */ gql`
         deleteEducation(education_id: Int!): DeleteResult
         deleteImage: DeleteResult
     }
-    
-    
 `;
 
 export default typeDefs;

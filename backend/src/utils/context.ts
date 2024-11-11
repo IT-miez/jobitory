@@ -2,7 +2,7 @@ import jwt, {JwtPayload} from 'jsonwebtoken';
 import {ExpressContextFunctionArgument} from '@apollo/server/express4';
 import {prisma} from '../index.js';
 
-type JobitoryJwtPayload = JwtPayload & {id: number}
+type JobitoryJwtPayload = JwtPayload & {id: number};
 
 export async function context({req}: ExpressContextFunctionArgument) {
     const token = req.headers.authorization || '';
@@ -14,7 +14,7 @@ export async function context({req}: ExpressContextFunctionArgument) {
         let user = null;
 
         if (validToken) {
-            user = await prisma.user.findUnique({where: {id: decodedToken.id}, include: {image: true}});
+            user = await prisma.user.findUnique({where: {id: validToken.id}, include: {image: true}});
         }
 
         return {
