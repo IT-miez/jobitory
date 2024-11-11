@@ -25,6 +25,7 @@ const resolvers: Resolvers = {
                     id: id,
                 },
                 select: {
+                    id: true,
                     email: true,
                     first_name: true,
                     last_name: true,
