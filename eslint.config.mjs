@@ -30,6 +30,7 @@ export default [
     {
         rules: {
             'no-console': ['error', {allow: ['error']}],
+            'react-refresh/only-export-components': 'off',
         },
     },
 ];
