@@ -33,12 +33,12 @@ export function UpdateUserForm({
     const [updateUser, {error}] = useJobitoryMutation(UPDATE_USER, {
         onCompleted: (data) => {
             if (typeof data?.updateUser?.user?.email === 'string' && storageEmail !== data?.updateUser?.user?.email) {
-                toastQueue.add({element: 'Email updated. Please log in.', color: 'success'}, {timeout: 5000});
+                toastQueue.add({element: 'Email updated. Please log in.', severity: 'success'}, {timeout: 5000});
                 localStorage.clear();
                 navigate('/login');
             } else {
                 setIsOpen(false);
-                toastQueue.add({element: 'Personal details updated', color: 'success'}, {timeout: 5000});
+                toastQueue.add({element: 'Personal details updated', severity: 'success'}, {timeout: 5000});
             }
         },
         refetchQueries: [{query: PROFILE_DATA, variables: {id: userId}}],
@@ -90,7 +90,7 @@ export function UpdateUserForm({
                 />
             </div>
             <div className="flex justify-between">
-                <Button color="error">Delete Account</Button>
+                <Button color="danger">Delete Account</Button>
                 <div className="flex gap-2">
                     <Button onPress={() => setIsOpen(false)} color="secondary">
                         Cancel
