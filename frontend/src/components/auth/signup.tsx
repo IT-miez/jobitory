@@ -8,7 +8,7 @@ export function SignUp() {
     const navigate = useNavigate();
     const [signUp, {error}] = useJobitoryMutation(MAKE_USER, {
         onCompleted: () => {
-            toastQueue.add({element: 'Account created', color: 'success'}, {timeout: 5000});
+            toastQueue.add({element: 'Account created', severity: 'success'}, {timeout: 5000});
             navigate('/login');
         },
     });

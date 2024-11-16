@@ -5,6 +5,8 @@ import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
 
 export default [
+    pluginJs.configs.recommended,
+    ...tseslint.configs.recommended,
     {ignores: ['**/dist/**', 'backend/src/generated']},
     {
         files: ['backend/**/*.{ts}'],
@@ -25,8 +27,6 @@ export default [
             'react-refresh/only-export-components': ['warn', {allowConstantExport: true}],
         },
     },
-    pluginJs.configs.recommended,
-    ...tseslint.configs.recommended,
     {
         rules: {
             'no-console': ['error', {allow: ['error']}],

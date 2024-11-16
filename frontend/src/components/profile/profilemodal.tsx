@@ -1,5 +1,5 @@
 import {useContext, useMemo} from 'react';
-import {Heading, Modal, Text} from '@topihenrik/funktia';
+import {Avatar, Heading, Modal, Text} from '@topihenrik/funktia';
 import {ProfileModalContext} from '../common/modalprovider.tsx';
 import {useQuery} from '@apollo/client';
 import {PROFILE_DATA} from '../../graphql/queries.ts';
@@ -28,7 +28,7 @@ export function ProfileModal() {
         <Modal isOpen={isOpen} onChange={onChange}>
             <div className="flex flex-col gap-4">
                 <div className="flex gap-2 items-center">
-                    <img className="w-10 h-10 rounded-[100%]" src={image_url} alt="avatar" />
+                    <Avatar src={image_url} />
                     <Heading level={3}>{`${data?.profileData?.first_name} ${data?.profileData?.last_name}`}</Heading>
                 </div>
                 <Text>You can update your personal details here.</Text>

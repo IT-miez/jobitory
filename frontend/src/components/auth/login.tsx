@@ -61,7 +61,7 @@ export function Login() {
                         name="password"
                         startIcon="KeyRound"
                     />
-                    {error?.validationErrors && <InlineAlert color={'error'} message={'Invalid credentials'} />}
+                    {error?.validationErrors && <InlineAlert severity="danger" message={'Invalid credentials'} />}
                     <Button type="submit" className="mt-4" color="primary">
                         Login
                     </Button>
