@@ -112,6 +112,15 @@ const typeDefs = /* GraphQL */ gql`
         municipality: String
         image_url: String
     }
+    
+    type JobStatus {
+        id: Int!
+        status: String
+        company_name: String
+        apply_time: String
+        end_time: String
+        notes: String
+    }
 
     input NewUserInput {
         email: String! @constraint(minLength: 3, maxLength: 64, format: "email")
@@ -135,6 +144,7 @@ const typeDefs = /* GraphQL */ gql`
         profileData(id: Int): User
         experiencesData(email: String): [ExperienceData!]!
         educationsData(email: String): [EducationOutput!]!
+        jobTrackingData: [JobStatus]
     }
 
     type Mutation {
