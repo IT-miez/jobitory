@@ -114,6 +114,40 @@ const resolvers: Resolvers = {
                 throw new GraphQLError(`Error fetching experiences: ${error.message}`);
             }
         },
+
+        jobTrackingData: async (root, args, context) => {
+            if (!context.user || !args.email) {
+                throw new GraphQLError('User not authenticated');
+            }
+
+            try {
+                const jobStatusData = await prisma.JobStatus.findUnique({
+                    where: {
+                        user_id: context.user.id,
+                    },
+                    include: {
+                        educations: true,
+                    },
+                });
+
+                if (!jobStatusData || !jobStatusData.jobStatus) {
+                    return [];
+                }
+
+                return jobStatusData.jobStatus.map((edu) => ({
+                    school_name: edu.school_name,
+                    degree: edu.degree,
+                    subject: edu.subject,
+                    city: edu.city,
+                    from: edu.from.toISOString(), // Convert Date to ISO string
+                    to: edu.to ? edu.to.toISOString() : null, // Convert Date to ISO string, handle null
+                    additional_information: edu.additional_information,
+                }));
+            } catch (error) {
+                console.error('Error fetching experiences:', error);
+                throw new GraphQLError(`Error fetching experiences: ${error.message}`);
+            }
+        },
     },
 
     Mutation: {
