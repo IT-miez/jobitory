@@ -105,3 +105,13 @@ model UserData {
   user_id     Int          @unique
   user        User         @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
+
+// Models for tracking job information
+model JobStatus {
+  id           Int       @id @default(autoincrement())
+  status       String?
+  company_name String?
+  apply_time   DateTime?
+  end_time     DateTime?
+  notes        String?
+}
